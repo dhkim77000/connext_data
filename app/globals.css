@@ -1,62 +1,90 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /*
   Design POV: Claude.ai — warm editorial minimalism.
-  Cream paper surfaces (not gray), warm near-black ink, a single clay accent used
-  sparingly. Type: Pretendard with deliberate weight + size contrast.
+  Cream paper surfaces (not gray), warm near-black ink, a single clay accent.
+  Tailwind v4: theme tokens live in @theme; CSS vars hold the values so they
+  can flip in dark mode.
 */
 
-@layer base {
-  :root {
-    --background: 48 33% 97%;       /* warm cream paper */
-    --foreground: 30 9% 13%;        /* warm near-black ink */
-    --card: 48 33% 99%;
-    --card-foreground: 30 9% 13%;
-    --popover: 48 33% 99%;
-    --popover-foreground: 30 9% 13%;
-    --primary: 30 9% 13%;           /* dark buttons, like Claude */
-    --primary-foreground: 48 33% 98%;
-    --secondary: 45 25% 93%;
-    --secondary-foreground: 30 9% 18%;
-    --muted: 45 24% 94%;
-    --muted-foreground: 35 7% 42%;
-    --accent: 45 25% 92%;
-    --accent-foreground: 30 9% 18%;
-    --destructive: 6 58% 49%;
-    --destructive-foreground: 48 33% 98%;
-    --border: 42 17% 87%;
-    --input: 42 17% 87%;
-    --ring: 16 52% 52%;             /* clay focus */
-    --clay: 16 56% 53%;             /* the one accent — Claude's clay */
-    --clay-foreground: 48 33% 98%;
-    --radius: 0.625rem;
-  }
+@custom-variant dark (&:where(.dark, .dark *));
 
-  .dark {
-    --background: 30 8% 9%;         /* warm charcoal */
-    --foreground: 45 20% 91%;
-    --card: 30 7% 12%;
-    --card-foreground: 45 20% 91%;
-    --popover: 30 7% 12%;
-    --popover-foreground: 45 20% 91%;
-    --primary: 45 20% 91%;
-    --primary-foreground: 30 9% 13%;
-    --secondary: 30 6% 17%;
-    --secondary-foreground: 45 20% 91%;
-    --muted: 30 6% 16%;
-    --muted-foreground: 40 8% 60%;
-    --accent: 30 6% 18%;
-    --accent-foreground: 45 20% 91%;
-    --destructive: 6 50% 45%;
-    --destructive-foreground: 45 20% 91%;
-    --border: 30 6% 20%;
-    --input: 30 6% 20%;
-    --ring: 16 52% 56%;
-    --clay: 16 60% 58%;
-    --clay-foreground: 30 9% 12%;
-  }
+:root {
+  --background: 48 33% 97%;
+  --foreground: 30 9% 13%;
+  --card: 48 33% 99%;
+  --card-foreground: 30 9% 13%;
+  --popover: 48 33% 99%;
+  --popover-foreground: 30 9% 13%;
+  --primary: 30 9% 13%;
+  --primary-foreground: 48 33% 98%;
+  --secondary: 45 25% 93%;
+  --secondary-foreground: 30 9% 18%;
+  --muted: 45 24% 94%;
+  --muted-foreground: 35 7% 42%;
+  --accent: 45 25% 92%;
+  --accent-foreground: 30 9% 18%;
+  --destructive: 6 58% 49%;
+  --destructive-foreground: 48 33% 98%;
+  --border: 42 17% 87%;
+  --input: 42 17% 87%;
+  --ring: 16 52% 52%;
+  --clay: 16 56% 53%;
+  --clay-foreground: 48 33% 98%;
+  --radius: 0.625rem;
+}
+
+.dark {
+  --background: 30 8% 9%;
+  --foreground: 45 20% 91%;
+  --card: 30 7% 12%;
+  --card-foreground: 45 20% 91%;
+  --popover: 30 7% 12%;
+  --popover-foreground: 45 20% 91%;
+  --primary: 45 20% 91%;
+  --primary-foreground: 30 9% 13%;
+  --secondary: 30 6% 17%;
+  --secondary-foreground: 45 20% 91%;
+  --muted: 30 6% 16%;
+  --muted-foreground: 40 8% 60%;
+  --accent: 30 6% 18%;
+  --accent-foreground: 45 20% 91%;
+  --destructive: 6 50% 45%;
+  --destructive-foreground: 45 20% 91%;
+  --border: 30 6% 20%;
+  --input: 30 6% 20%;
+  --ring: 16 52% 56%;
+  --clay: 16 60% 58%;
+  --clay-foreground: 30 9% 12%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-clay: hsl(var(--clay));
+  --color-clay-foreground: hsl(var(--clay-foreground));
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --font-sans: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 @layer base {
@@ -65,12 +93,10 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;
     font-feature-settings: 'ss01', 'cv01';
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
-  /* tighten large display headings — escape Pretendard's default tracking */
   h1, h2, h3 {
     letter-spacing: -0.02em;
   }
