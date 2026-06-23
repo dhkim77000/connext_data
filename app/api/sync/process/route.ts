@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Credentials not found' }, { status: 500 })
   }
 
-  const connExtra = (syncJob.channel_connections as Record<string, unknown> | null)
+  const connExtra = (syncJob.channel_connections as unknown as Record<string, unknown> | null)
     ?.extra as Record<string, string> | undefined
 
   const job: FetchJob = {

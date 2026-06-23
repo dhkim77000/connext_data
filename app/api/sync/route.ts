@@ -1,6 +1,7 @@
 // app/api/sync/route.ts
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getBaseUrl } from '@/lib/base-url'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   // Fire and forget — async processing
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL!
+  const appUrl = getBaseUrl(request)
   fetch(`${appUrl}/api/sync/process`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

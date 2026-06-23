@@ -1,6 +1,7 @@
 // app/api/oauth/meta/route.ts
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getBaseUrl } from '@/lib/base-url'
 
 const SCOPES = 'ads_read,ads_management,business_management,read_insights'
 
@@ -10,7 +11,7 @@ export async function GET(request: Request) {
   if (!user) return NextResponse.redirect(new URL('/login', request.url))
 
   const nonce = crypto.randomUUID()
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/oauth/meta/callback`
+  const redirectUri = `${getBaseUrl(request)}/api/oauth/meta/callback`
   const authUrl = 'https://www.facebook.com/v19.0/dialog/oauth?' + new URLSearchParams({
     client_id: process.env.META_APP_ID!,
     redirect_uri: redirectUri,

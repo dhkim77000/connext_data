@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ChannelCard } from '@/components/channel-card'
 
@@ -10,14 +11,16 @@ const AVAILABLE_CONNECTORS = [
 export default async function ChannelsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const { data: tenant } = await supabase
-    .from('tenants').select('id').eq('owner_auth_id', user!.id).single()
+    .from('tenants').select('id').eq('owner_auth_id', user.id).single()
+  if (!tenant) redirect('/login')
 
   const { data: connections } = await supabase
     .from('channel_connections')
     .select('*')
-    .eq('tenant_id', tenant!.id)
+    .eq('tenant_id', tenant.id)
     .order('created_at', { ascending: false })
 
   const connectedIds = new Set((connections ?? []).map((c) => c.connector_id))

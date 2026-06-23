@@ -15,7 +15,8 @@ export type Database = {
           owner_auth_id: string
           plan?: string
         }
-        Update: Partial<Database['public']['Tables']['tenants']['Insert']>
+        Update: Partial<Database['public']['Tables']['tenants']['Row']>
+        Relationships: []
       }
       channel_connections: {
         Row: {
@@ -35,7 +36,8 @@ export type Database = {
           status?: 'active' | 'error' | 'paused'
           extra?: Record<string, unknown>
         }
-        Update: Partial<Database['public']['Tables']['channel_connections']['Insert']>
+        Update: Partial<Database['public']['Tables']['channel_connections']['Row']>
+        Relationships: []
       }
       sync_jobs: {
         Row: {
@@ -62,7 +64,8 @@ export type Database = {
           since?: string
           until?: string
         }
-        Update: Partial<Database['public']['Tables']['sync_jobs']['Insert']>
+        Update: Partial<Database['public']['Tables']['sync_jobs']['Row']>
+        Relationships: []
       }
       channel_credentials: {
         Row: {
@@ -82,8 +85,21 @@ export type Database = {
           expires_at?: number
           extra?: Record<string, unknown>
         }
-        Update: Partial<Database['public']['Tables']['channel_credentials']['Insert']>
+        Update: Partial<Database['public']['Tables']['channel_credentials']['Row']>
+        Relationships: []
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }

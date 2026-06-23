@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { getBaseUrl } from '@/lib/base-url'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -14,7 +15,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Invalid OAuth callback' }, { status: 400 })
   }
 
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/oauth/meta/callback`
+  const redirectUri = `${getBaseUrl(request)}/api/oauth/meta/callback`
   const tokenRes = await fetch(
     'https://graph.facebook.com/v19.0/oauth/access_token?' +
     new URLSearchParams({

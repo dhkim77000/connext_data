@@ -1,6 +1,7 @@
 // app/api/oauth/shopify/route.ts
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getBaseUrl } from '@/lib/base-url'
 
 const SCOPES = 'read_orders,read_products,read_customers'
 
@@ -14,7 +15,7 @@ export async function GET(request: Request) {
   if (!shop) return NextResponse.json({ error: 'shop param required' }, { status: 400 })
 
   const nonce = crypto.randomUUID()
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/oauth/shopify/callback`
+  const redirectUri = `${getBaseUrl(request)}/api/oauth/shopify/callback`
   const installUrl = `https://${shop}/admin/oauth/authorize?` + new URLSearchParams({
     client_id: process.env.SHOPIFY_CLIENT_ID!,
     scope: SCOPES,
