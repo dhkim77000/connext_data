@@ -18,6 +18,9 @@
   ],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@clickhouse/client": "^1.22.0",
     "@supabase/ssr": "^0.12.0",
