@@ -1,90 +1,125 @@
 @import "tailwindcss";
 
 /*
-  Design POV: Claude.ai — warm editorial minimalism.
-  Cream paper surfaces (not gray), warm near-black ink, a single clay accent.
-  Tailwind v4: theme tokens live in @theme; CSS vars hold the values so they
-  can flip in dark mode.
+  Design POV: data terminal — a dark/light analytics instrument.
+  Cool charcoal (dark) / cool light-gray (light) — NOT warm paper.
+  An owned purple signature (#9B6CFF) that sits "above" every channel
+  (the Datadog principle: no channel owns purple). Sharp corners,
+  exposed grid, monospace data, Archivo display, Pretendard 한글.
 */
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: 48 33% 97%;
-  --foreground: 30 9% 13%;
-  --card: 48 33% 99%;
-  --card-foreground: 30 9% 13%;
-  --popover: 48 33% 99%;
-  --popover-foreground: 30 9% 13%;
-  --primary: 30 9% 13%;
-  --primary-foreground: 48 33% 98%;
-  --secondary: 45 25% 93%;
-  --secondary-foreground: 30 9% 18%;
-  --muted: 45 24% 94%;
-  --muted-foreground: 35 7% 42%;
-  --accent: 45 25% 92%;
-  --accent-foreground: 30 9% 18%;
-  --destructive: 6 58% 49%;
-  --destructive-foreground: 48 33% 98%;
-  --border: 42 17% 87%;
-  --input: 42 17% 87%;
-  --ring: 16 52% 52%;
-  --clay: 16 56% 53%;
-  --clay-foreground: 48 33% 98%;
-  --radius: 0.625rem;
+  --background: #F5F7F9;
+  --foreground: #0E1216;
+  --card: #FFFFFF;
+  --card-foreground: #0E1216;
+  --popover: #FFFFFF;
+  --popover-foreground: #0E1216;
+  --primary: #6E3AD6;
+  --primary-foreground: #FFFFFF;
+  --secondary: #ECEFF2;
+  --secondary-foreground: #1A1F25;
+  --muted: #EEF1F4;
+  --muted-foreground: #5B636C;
+  --accent: #6E3AD6;
+  --accent-foreground: #FFFFFF;
+  --destructive: #D83963;
+  --destructive-foreground: #FFFFFF;
+  --border: #E4E7EB;
+  --input: #E4E7EB;
+  --ring: #6E3AD6;
+
+  --cx-accent: #6E3AD6;
+  --cx-accent-soft: #8B5CF6;
+  --cx-grid: #E7EAEE;
+  --cx-dim: #9AA1A9;
+  --ch-shopify: #6E3AD6;
+  --ch-meta: #2F74D0;
+  --ch-youtube: #B8810C;
+  --ch-tiktok: #D83963;
+  --ch-naver: #0E9C86;
+  --pos: #1F9E54;
+  --neg: #D83963;
+
+  --radius: 0.125rem;
 }
 
 .dark {
-  --background: 30 8% 9%;
-  --foreground: 45 20% 91%;
-  --card: 30 7% 12%;
-  --card-foreground: 45 20% 91%;
-  --popover: 30 7% 12%;
-  --popover-foreground: 45 20% 91%;
-  --primary: 45 20% 91%;
-  --primary-foreground: 30 9% 13%;
-  --secondary: 30 6% 17%;
-  --secondary-foreground: 45 20% 91%;
-  --muted: 30 6% 16%;
-  --muted-foreground: 40 8% 60%;
-  --accent: 30 6% 18%;
-  --accent-foreground: 45 20% 91%;
-  --destructive: 6 50% 45%;
-  --destructive-foreground: 45 20% 91%;
-  --border: 30 6% 20%;
-  --input: 30 6% 20%;
-  --ring: 16 52% 56%;
-  --clay: 16 60% 58%;
-  --clay-foreground: 30 9% 12%;
+  --background: #0C0E10;
+  --foreground: #E8EAED;
+  --card: #121519;
+  --card-foreground: #E8EAED;
+  --popover: #121519;
+  --popover-foreground: #E8EAED;
+  --primary: #9B6CFF;
+  --primary-foreground: #0C0E10;
+  --secondary: #1A1F24;
+  --secondary-foreground: #E8EAED;
+  --muted: #181C20;
+  --muted-foreground: #888F98;
+  --accent: #9B6CFF;
+  --accent-foreground: #0C0E10;
+  --destructive: #FF5C5C;
+  --destructive-foreground: #0C0E10;
+  --border: #23282D;
+  --input: #23282D;
+  --ring: #9B6CFF;
+
+  --cx-accent: #9B6CFF;
+  --cx-accent-soft: #B79BFF;
+  --cx-grid: #23282D;
+  --cx-dim: #5A626B;
+  --ch-shopify: #9B6CFF;
+  --ch-meta: #4D8DF0;
+  --ch-youtube: #E0A23C;
+  --ch-tiktok: #F2557A;
+  --ch-naver: #2DD4BF;
+  --pos: #2DD4BF;
+  --neg: #FF5C5C;
 }
 
 @theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-clay: hsl(var(--clay));
-  --color-clay-foreground: hsl(var(--clay-foreground));
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-cx-accent: var(--cx-accent);
+  --color-cx-accent-soft: var(--cx-accent-soft);
+  --color-cx-grid: var(--cx-grid);
+  --color-cx-dim: var(--cx-dim);
+  --color-ch-shopify: var(--ch-shopify);
+  --color-ch-meta: var(--ch-meta);
+  --color-ch-youtube: var(--ch-youtube);
+  --color-ch-tiktok: var(--ch-tiktok);
+  --color-ch-naver: var(--ch-naver);
+  --color-pos: var(--pos);
+  --color-neg: var(--neg);
+
   --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: var(--radius);
+  --radius-sm: var(--radius);
+
   --font-sans: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Archivo', 'Pretendard Variable', sans-serif;
 }
 
 @layer base {
@@ -93,7 +128,6 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: 'ss01', 'cv01';
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
