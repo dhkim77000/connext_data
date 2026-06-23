@@ -2,50 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Design POV: Claude.ai — warm editorial minimalism.
+  Cream paper surfaces (not gray), warm near-black ink, a single clay accent used
+  sparingly. Type: Pretendard with deliberate weight + size contrast.
+*/
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 9%;
-    --radius: 0.5rem;
+    --background: 48 33% 97%;       /* warm cream paper */
+    --foreground: 30 9% 13%;        /* warm near-black ink */
+    --card: 48 33% 99%;
+    --card-foreground: 30 9% 13%;
+    --popover: 48 33% 99%;
+    --popover-foreground: 30 9% 13%;
+    --primary: 30 9% 13%;           /* dark buttons, like Claude */
+    --primary-foreground: 48 33% 98%;
+    --secondary: 45 25% 93%;
+    --secondary-foreground: 30 9% 18%;
+    --muted: 45 24% 94%;
+    --muted-foreground: 35 7% 42%;
+    --accent: 45 25% 92%;
+    --accent-foreground: 30 9% 18%;
+    --destructive: 6 58% 49%;
+    --destructive-foreground: 48 33% 98%;
+    --border: 42 17% 87%;
+    --input: 42 17% 87%;
+    --ring: 16 52% 52%;             /* clay focus */
+    --clay: 16 56% 53%;             /* the one accent — Claude's clay */
+    --clay-foreground: 48 33% 98%;
+    --radius: 0.625rem;
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --background: 30 8% 9%;         /* warm charcoal */
+    --foreground: 45 20% 91%;
+    --card: 30 7% 12%;
+    --card-foreground: 45 20% 91%;
+    --popover: 30 7% 12%;
+    --popover-foreground: 45 20% 91%;
+    --primary: 45 20% 91%;
+    --primary-foreground: 30 9% 13%;
+    --secondary: 30 6% 17%;
+    --secondary-foreground: 45 20% 91%;
+    --muted: 30 6% 16%;
+    --muted-foreground: 40 8% 60%;
+    --accent: 30 6% 18%;
+    --accent-foreground: 45 20% 91%;
+    --destructive: 6 50% 45%;
+    --destructive-foreground: 45 20% 91%;
+    --border: 30 6% 20%;
+    --input: 30 6% 20%;
+    --ring: 16 52% 56%;
+    --clay: 16 60% 58%;
+    --clay-foreground: 30 9% 12%;
   }
 }
 
@@ -55,5 +65,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;
+    font-feature-settings: 'ss01', 'cv01';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* tighten large display headings — escape Pretendard's default tracking */
+  h1, h2, h3 {
+    letter-spacing: -0.02em;
   }
 }

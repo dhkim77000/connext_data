@@ -3,7 +3,9 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getBaseUrl } from '@/lib/base-url'
 
-const SCOPES = 'ads_read,ads_management,business_management,read_insights'
+// Read-only scopes — connext only ingests/analyzes ad data, never writes.
+// Avoiding ads_management / business_management eases Meta App Review + Tech Provider verification.
+const SCOPES = 'ads_read,read_insights'
 
 export async function GET(request: Request) {
   const supabase = await createClient()
