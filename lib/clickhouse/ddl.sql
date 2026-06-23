@@ -66,3 +66,33 @@ CREATE TABLE IF NOT EXISTS connext.meta_ads_insights (
 ) ENGINE = MergeTree()
 PARTITION BY (tenant_id, toYYYYMM(date_start))
 ORDER BY (tenant_id, date_start, ad_id);
+
+CREATE TABLE IF NOT EXISTS connext.instagram_media (
+  tenant_id      String,
+  ingested_at    DateTime DEFAULT now(),
+  raw            String,
+  media_id       String,
+  ig_user_id     String,
+  media_type     String,
+  caption        String DEFAULT '',
+  permalink      String DEFAULT '',
+  like_count     Int64 DEFAULT 0,
+  comments_count Int64 DEFAULT 0,
+  timestamp      DateTime
+) ENGINE = MergeTree()
+PARTITION BY (tenant_id, toYYYYMM(timestamp))
+ORDER BY (tenant_id, timestamp, media_id);
+
+CREATE TABLE IF NOT EXISTS connext.instagram_account_insights (
+  tenant_id      String,
+  ingested_at    DateTime DEFAULT now(),
+  raw            String,
+  ig_user_id     String,
+  date           Date,
+  reach          Int64 DEFAULT 0,
+  impressions    Int64 DEFAULT 0,
+  follower_count Int64 DEFAULT 0,
+  profile_views  Int64 DEFAULT 0
+) ENGINE = MergeTree()
+PARTITION BY (tenant_id, toYYYYMM(date))
+ORDER BY (tenant_id, date, ig_user_id);

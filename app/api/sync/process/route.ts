@@ -5,10 +5,12 @@ import { processJob } from '@/lib/worker/processor'
 import { registerConnector } from '@/lib/connectors/registry'
 import { shopifyConnector } from '@/lib/connectors/shopify'
 import { metaAdsConnector } from '@/lib/connectors/meta-ads'
+import { instagramConnector } from '@/lib/connectors/instagram'
 import type { FetchJob } from '@/lib/connectors/types'
 
 registerConnector(shopifyConnector)
 registerConnector(metaAdsConnector)
+registerConnector(instagramConnector)
 
 export async function POST(request: Request) {
   const { jobId } = (await request.json()) as { jobId: string }

@@ -40,6 +40,19 @@ const CONNECTOR_INFO: Record<string, ConnectorGuide> = {
     prerequisite: '광고 계정 관리자 권한이 있어야 합니다.',
     oauthPath: '/api/oauth/meta',
   },
+  instagram: {
+    label: 'Instagram',
+    tagline: '게시물·좋아요·팔로워·도달 등 인스타그램 인사이트를 가져옵니다.',
+    dataTypes: ['게시물', '좋아요·댓글', '팔로워', '도달·노출'],
+    steps: [
+      'Facebook 계정으로 로그인',
+      '인스타그램 비즈니스 계정 권한 허용',
+      '게시물·인사이트가 동기화됩니다',
+    ],
+    permissions: ['게시물·프로필 읽기 (instagram_basic)', '인사이트 읽기 (instagram_manage_insights)'],
+    prerequisite: '인스타그램 비즈니스/크리에이터 계정이 Facebook 페이지에 연결돼 있어야 합니다.',
+    oauthPath: '/api/oauth/instagram',
+  },
 }
 
 export default async function ConnectPage({

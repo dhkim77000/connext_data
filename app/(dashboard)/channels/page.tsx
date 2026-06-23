@@ -6,6 +6,7 @@ import { ChannelCard } from '@/components/channel-card'
 const AVAILABLE_CONNECTORS = [
   { id: 'shopify', label: 'Shopify' },
   { id: 'meta_ads', label: 'Meta Ads' },
+  { id: 'instagram', label: 'Instagram' },
 ]
 
 export default async function ChannelsPage() {
