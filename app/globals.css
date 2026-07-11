@@ -1,83 +1,93 @@
 @import "tailwindcss";
 
 /*
-  Design POV: data terminal — a dark/light analytics instrument.
-  Cool charcoal (dark) / cool light-gray (light) — NOT warm paper.
-  An owned purple signature (#9B6CFF) that sits "above" every channel
-  (the Datadog principle: no channel owns purple). Sharp corners,
-  exposed grid, monospace data, Archivo display, Pretendard 한글.
+  Design POV: Hume-inspired editorial minimal — restrained, premium, human.
+  Warm ink (#222) on white; a single soft lavender accent (#C094E4) reserved
+  for highlights (never as a button fill). Dark-ink pill buttons, generous
+  whitespace, calm motion. Light-dominant with a warm #222 dark mode.
+  Type: Manrope (Latin) + Pretendard (한글) + Spline Sans Mono (labels).
 */
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #F5F7F9;
-  --foreground: #0E1216;
+  --background: #FFFFFF;
+  --foreground: #222222;
   --card: #FFFFFF;
-  --card-foreground: #0E1216;
+  --card-foreground: #222222;
   --popover: #FFFFFF;
-  --popover-foreground: #0E1216;
-  --primary: #6E3AD6;
-  --primary-foreground: #FFFFFF;
-  --secondary: #ECEFF2;
-  --secondary-foreground: #1A1F25;
-  --muted: #EEF1F4;
-  --muted-foreground: #5B636C;
-  --accent: #6E3AD6;
-  --accent-foreground: #FFFFFF;
-  --destructive: #D83963;
-  --destructive-foreground: #FFFFFF;
-  --border: #E4E7EB;
-  --input: #E4E7EB;
-  --ring: #6E3AD6;
+  --popover-foreground: #222222;
+  --primary: #222222;
+  --primary-foreground: #FFF9F3;
+  --secondary: #F4F2EF;
+  --secondary-foreground: #222222;
+  --muted: #F4F2EF;
+  --muted-foreground: rgba(34, 34, 34, 0.56);
+  --accent: #C094E4;
+  --accent-foreground: #3A2B4A;
+  --destructive: #C0453B;
+  --destructive-foreground: #FFF9F3;
+  --border: rgba(34, 34, 34, 0.10);
+  --input: rgba(34, 34, 34, 0.14);
+  --ring: #C094E4;
 
-  --cx-accent: #6E3AD6;
-  --cx-accent-soft: #8B5CF6;
-  --cx-grid: #E7EAEE;
-  --cx-dim: #9AA1A9;
-  --ch-shopify: #6E3AD6;
-  --ch-meta: #2F74D0;
-  --ch-youtube: #B8810C;
-  --ch-tiktok: #D83963;
-  --ch-naver: #0E9C86;
-  --pos: #1F9E54;
-  --neg: #D83963;
+  --cx-accent: #C094E4;
+  --cx-accent-soft: #D6BEEE;
+  /* Chart line/stroke ink — deeper lavender than the brand accent so 2px marks
+     clear 3:1 on white (accent itself is 2.44:1; fills/washes keep the accent). */
+  --cx-chart-line: #A874D6;
+  --cx-grid: rgba(34, 34, 34, 0.07);
+  --cx-dim: rgba(34, 34, 34, 0.42);
+  --ch-shopify: #C094E4;
+  --ch-meta: #3E7BD6;
+  --ch-youtube: #C08A2E;
+  --ch-tiktok: #D65A7E;
+  --ch-naver: #2AA18C;
+  /* Instagram currently shares the tiktok hue (both rose). Give it its own slot
+     before the two ever co-plot in one chart (cross-channel home, M3+). */
+  --ch-instagram: #D65A7E;
+  --pos: #2E8B57;
+  --neg: #C0453B;
 
-  --radius: 0.125rem;
+  --radius: 0.75rem;
 }
 
 .dark {
-  --background: #0C0E10;
-  --foreground: #E8EAED;
-  --card: #121519;
-  --card-foreground: #E8EAED;
-  --popover: #121519;
-  --popover-foreground: #E8EAED;
-  --primary: #9B6CFF;
-  --primary-foreground: #0C0E10;
-  --secondary: #1A1F24;
-  --secondary-foreground: #E8EAED;
-  --muted: #181C20;
-  --muted-foreground: #888F98;
-  --accent: #9B6CFF;
-  --accent-foreground: #0C0E10;
-  --destructive: #FF5C5C;
-  --destructive-foreground: #0C0E10;
-  --border: #23282D;
-  --input: #23282D;
-  --ring: #9B6CFF;
+  --background: #222222;
+  --foreground: #FBF5EF;
+  --card: #2A2926;
+  --card-foreground: #FBF5EF;
+  --popover: #2A2926;
+  --popover-foreground: #FBF5EF;
+  --primary: #FBF5EF;
+  --primary-foreground: #222222;
+  --secondary: #2F2E2A;
+  --secondary-foreground: #FBF5EF;
+  --muted: #2F2E2A;
+  --muted-foreground: rgba(255, 255, 255, 0.55);
+  --accent: #C094E4;
+  --accent-foreground: #241B30;
+  --destructive: #E8756B;
+  --destructive-foreground: #241B14;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.16);
+  --ring: #C094E4;
 
-  --cx-accent: #9B6CFF;
-  --cx-accent-soft: #B79BFF;
-  --cx-grid: #23282D;
-  --cx-dim: #5A626B;
-  --ch-shopify: #9B6CFF;
-  --ch-meta: #4D8DF0;
-  --ch-youtube: #E0A23C;
-  --ch-tiktok: #F2557A;
-  --ch-naver: #2DD4BF;
-  --pos: #2DD4BF;
-  --neg: #FF5C5C;
+  --cx-accent: #C094E4;
+  --cx-accent-soft: #D6BEEE;
+  --cx-chart-line: #A874D6;
+  --cx-grid: rgba(255, 255, 255, 0.08);
+  --cx-dim: rgba(255, 255, 255, 0.40);
+  /* Chart-safe dark channel hues — validated categorical palette (OKLCH L 0.48–0.67,
+     CVD-separated in the canonical order shopify→naver→meta→youtube→tiktok). */
+  --ch-shopify: #A874D6;
+  --ch-meta: #4B7FCB;
+  --ch-youtube: #B8802A;
+  --ch-tiktok: #DB5077;
+  --ch-naver: #2AA893;
+  --ch-instagram: #DB5077;
+  --pos: #6BCB8F;
+  --neg: #E8756B;
 }
 
 @theme inline {
@@ -110,16 +120,18 @@
   --color-ch-youtube: var(--ch-youtube);
   --color-ch-tiktok: var(--ch-tiktok);
   --color-ch-naver: var(--ch-naver);
+  --color-ch-instagram: var(--ch-instagram);
   --color-pos: var(--pos);
   --color-neg: var(--neg);
 
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
-  --radius-md: var(--radius);
-  --radius-sm: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 
-  --font-sans: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --font-display: 'Archivo', 'Pretendard Variable', sans-serif;
+  --font-sans: 'Manrope', 'Pretendard Variable', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Spline Sans Mono', ui-monospace, monospace;
+  --font-display: 'Manrope', 'Pretendard Variable', sans-serif;
 }
 
 @layer base {
@@ -128,10 +140,104 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
   h1, h2, h3 {
+    font-weight: 500;
     letter-spacing: -0.02em;
   }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* ── Motion system ─────────────────────────────────────────────────────────
+   transform/opacity only, 120–400ms, entrance runs ONCE. Everything below is
+   disabled wholesale under prefers-reduced-motion. */
+
+@keyframes cx-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes cx-draw {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+@keyframes cx-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes cx-grow-x {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes cx-grow-y {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+@keyframes cx-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Panel entrance — stagger children of a .cx-stagger grid (once, on load). */
+  .cx-stagger > * {
+    animation: cx-rise 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .cx-stagger > *:nth-child(2)  { animation-delay: 40ms; }
+  .cx-stagger > *:nth-child(3)  { animation-delay: 80ms; }
+  .cx-stagger > *:nth-child(4)  { animation-delay: 120ms; }
+  .cx-stagger > *:nth-child(5)  { animation-delay: 160ms; }
+  .cx-stagger > *:nth-child(6)  { animation-delay: 200ms; }
+  .cx-stagger > *:nth-child(7)  { animation-delay: 240ms; }
+  .cx-stagger > *:nth-child(8)  { animation-delay: 280ms; }
+  .cx-stagger > *:nth-child(n+9) { animation-delay: 320ms; }
+
+  .cx-draw-line {
+    stroke-dasharray: 1;
+    animation: cx-draw 350ms ease-out both;
+  }
+  .cx-fade-in { animation: cx-fade 300ms ease-out both; }
+  .cx-grow-bar {
+    transform-origin: bottom;
+    animation: cx-grow-y 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--cx-i, 0) * 12ms);
+  }
+  .cx-grow-fill {
+    transform-origin: left;
+    animation: cx-grow-x 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+/* Shared chart tooltip chrome — one look for every chart's hover readout. */
+.cx-tooltip {
+  pointer-events: none;
+  position: absolute;
+  z-index: 10;
+  border-radius: calc(var(--radius) - 4px);
+  border: 1px solid var(--border);
+  background: var(--popover);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Micro-interactions (always on — they're feedback, not decoration; still
+   transform/opacity only and ≤150ms). */
+.cx-press {
+  transition: transform 120ms ease, opacity 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+.cx-press:active { transform: scale(0.97); }
+
+/* Skeletons — opacity pulse only (no shimmer gradients). */
+.cx-skeleton {
+  border-radius: var(--radius);
+  background: var(--muted);
+  animation: cx-pulse 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cx-skeleton { animation: none; }
 }
