@@ -16,6 +16,8 @@ import { fmtShortDate } from '@/lib/format'
 export type TimeSeriesRow = { x: string } & Record<string, number | string>
 export type SeriesSpec = { key: string; label: string; color?: string }
 export type ContextSpec = { key: string; label: string; format?: ValueFormat }
+// A dated annotation ("what happened here") — vertical guide + top label chip.
+export type EventMarker = { x: string; label: string }
 
 const PAD = { t: 14, r: 8, b: 22, l: 8 }
 
@@ -27,6 +29,7 @@ export function TimeSeriesChart({
   height = 200,
   baseline = 'zero',
   context = [],
+  events = [],
   ariaLabel,
 }: {
   data: TimeSeriesRow[]
@@ -36,6 +39,7 @@ export function TimeSeriesChart({
   height?: number
   baseline?: 'zero' | 'auto'
   context?: ContextSpec[]
+  events?: EventMarker[]
   ariaLabel?: string
 }) {
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -54,6 +58,14 @@ export function TimeSeriesChart({
 
   const visible = series.filter((s) => !hidden.includes(s.key))
   const n = data.length
+
+  // event markers → data indices (only those whose x is in the series)
+  const eventIdx = useMemo(() => {
+    const pos = new Map(data.map((r, i) => [r.x, i]))
+    return events
+      .map((e) => ({ ...e, i: pos.get(e.x) }))
+      .filter((e): e is EventMarker & { i: number } => e.i !== undefined)
+  }, [events, data])
 
   const geom = useMemo(() => {
     if (width === 0 || n < 2 || visible.length === 0) return null
@@ -100,6 +112,7 @@ export function TimeSeriesChart({
 
   const label = ariaLabel ?? `${visible.map((s) => s.label).join(', ')} over time`
   const hoverRow = hoverIdx !== null ? data[hoverIdx] : null
+  const hoverEvent = hoverIdx !== null ? eventIdx.find((e) => e.i === hoverIdx) : undefined
   const prevRow = hoverIdx !== null && hoverIdx > 0 ? data[hoverIdx - 1] : null
   const tooltipOnRight = geom && hoverIdx !== null ? geom.x(hoverIdx) < width * 0.6 : true
 
@@ -203,6 +216,23 @@ export function TimeSeriesChart({
                 />
               ))}
 
+              {/* event guides — dashed verticals with a dot at the top */}
+              {eventIdx.map((e) => (
+                <g key={`ev-${e.i}`}>
+                  <line
+                    x1={geom.x(e.i)}
+                    x2={geom.x(e.i)}
+                    y1={PAD.t}
+                    y2={height - PAD.b}
+                    stroke="var(--cx-dim)"
+                    strokeWidth="1"
+                    strokeDasharray="3 3"
+                    opacity="0.55"
+                  />
+                  <circle cx={geom.x(e.i)} cy={PAD.t} r="3" fill="var(--foreground)" stroke="var(--card)" strokeWidth="1.5" />
+                </g>
+              ))}
+
               {/* crosshair + markers */}
               {hoverIdx !== null && (
                 <g>
@@ -245,6 +275,25 @@ export function TimeSeriesChart({
                   </text>
                 ))}
             </svg>
+
+            {/* event label chips, aligned to each guide */}
+            {eventIdx.map((e) => {
+              const cx = geom.x(e.i)
+              const nearLeft = cx < width * 0.15
+              const nearRight = cx > width * 0.85
+              return (
+                <span
+                  key={`evlbl-${e.i}`}
+                  className="pointer-events-none absolute top-0 whitespace-nowrap rounded-full border border-border bg-popover px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground shadow-sm"
+                  style={{
+                    left: cx,
+                    transform: `translateX(${nearLeft ? '0' : nearRight ? '-100%' : '-50%'}) translateY(-2px)`,
+                  }}
+                >
+                  {e.label}
+                </span>
+              )
+            })}
 
             {/* tooltip — values lead, line keys carry identity */}
             {hoverRow && hoverIdx !== null && (
@@ -291,6 +340,11 @@ export function TimeSeriesChart({
                     {c.label} {formatValue(Number(hoverRow[c.key] ?? 0), c.format ?? 'int', currency)}
                   </p>
                 ))}
+                {hoverEvent && (
+                  <p className="mt-1.5 border-t border-border pt-1.5 text-[11px] leading-snug text-foreground">
+                    {hoverEvent.label}
+                  </p>
+                )}
               </div>
             )}
           </>

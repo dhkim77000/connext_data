@@ -1,5 +1,5 @@
-// Demo · Advanced — cohort retention, RFM segments, day×hour pattern,
-// repurchase timing, customer lifetime value.
+// Demo · Retention — do customers come back? Cohort retention, RFM segments,
+// repurchase timing, lifetime value, and when orders happen.
 
 import { Label, Panel, BarRow } from '@/components/dashboard/ui'
 import { TimeSeriesChart } from '@/components/charts/time-series-chart'
@@ -12,13 +12,12 @@ import { demoCohorts, demoRfm, demoWeekHour, demoRepurchaseGaps, demoLtvCurve, d
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const HOUR_LABELS = Array.from({ length: 24 }, (_, h) => (h % 6 === 0 ? `${h}:00` : null))
 
-export default function DemoAdvancedPage() {
+export default function DemoRetentionPage() {
   const maxRfm = Math.max(...demoRfm.map((r) => r.customers), 1)
   const maxGap = Math.max(...demoRepurchaseGaps.map((g) => g.customers), 1)
 
   return (
     <div className="cx-stagger grid gap-3 lg:grid-cols-12">
-      {/* Cohort retention */}
       <Panel className="lg:col-span-7">
         <Label>Repeat purchase retention · by first-order month</Label>
         <p className="mt-1.5 mb-4 text-sm text-muted-foreground">
@@ -27,18 +26,15 @@ export default function DemoAdvancedPage() {
         <CohortGrid cohorts={demoCohorts} />
       </Panel>
 
-      {/* RFM segments */}
       <Panel className="lg:col-span-5">
         <Label>Customer segments</Label>
-        <p className="mt-1.5 mb-4 text-sm text-muted-foreground">
-          Grouped automatically by recency, frequency and spend.
-        </p>
+        <p className="mt-1.5 mb-4 text-sm text-muted-foreground">Grouped by recency, frequency and spend.</p>
         <ul className="space-y-2.5">
           {demoRfm.map((r) => (
             <BarRow
               key={r.segment}
               label={r.segment}
-              value={`${fmtInt(r.customers)} · ${r.revenueShare}% of revenue`}
+              value={`${fmtInt(r.customers)} · ${r.revenueShare}%`}
               pct={(r.customers / maxRfm) * 100}
               title={r.desc}
             />
@@ -46,7 +42,6 @@ export default function DemoAdvancedPage() {
         </ul>
       </Panel>
 
-      {/* Day × hour heatmap */}
       <Panel className="lg:col-span-7">
         <Label>When orders happen</Label>
         <p className="mt-1.5 mb-4 text-sm text-muted-foreground">
@@ -55,7 +50,6 @@ export default function DemoAdvancedPage() {
         <Heatmap values={demoWeekHour} rowLabels={DOW} colLabels={HOUR_LABELS} unit="orders" />
       </Panel>
 
-      {/* Repurchase timing */}
       <Panel className="lg:col-span-5">
         <Label>Time until the second order</Label>
         <p className="mt-1.5 mb-4 text-sm text-muted-foreground">Among customers who bought again.</p>
@@ -69,7 +63,6 @@ export default function DemoAdvancedPage() {
         </p>
       </Panel>
 
-      {/* LTV curve */}
       <Panel className="lg:col-span-7">
         <Label>Value of one customer over time</Label>
         <p className="mt-1.5 mb-4 text-sm text-muted-foreground">
@@ -84,8 +77,7 @@ export default function DemoAdvancedPage() {
         />
       </Panel>
 
-      {/* Repurchase insight */}
-      <InsightCard insight={demoInsights[2]} className="lg:col-span-5" />
+      <InsightCard insight={demoInsights[3]} className="lg:col-span-5" />
     </div>
   )
 }

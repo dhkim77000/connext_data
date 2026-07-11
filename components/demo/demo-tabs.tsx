@@ -4,11 +4,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
+// Tabs read as questions a merchant asks, not internal architecture terms.
 const TABS = [
   { href: '/demo', label: 'Overview' },
-  { href: '/demo/channels', label: 'Channels' },
-  { href: '/demo/advanced', label: 'Advanced' },
-  { href: '/demo/cross', label: 'Cross-platform' },
+  { href: '/demo/moments', label: 'Moments' },
+  { href: '/demo/sales', label: 'Sales' },
+  { href: '/demo/marketing', label: 'Marketing' },
+  { href: '/demo/audience', label: 'Audience' },
+  { href: '/demo/retention', label: 'Retention' },
 ]
 
 export function DemoTabs() {
