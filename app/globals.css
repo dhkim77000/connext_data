@@ -48,6 +48,14 @@
   --ch-instagram: #D65A7E;
   --pos: #2E8B57;
   --neg: #C0453B;
+  --warn: #A06E1E;
+
+  /* Sequential ramp (single hue, monotonic lightness) — heatmaps/cohorts. */
+  --cx-seq-1: #F1E8FA;
+  --cx-seq-2: #DCC4F0;
+  --cx-seq-3: #C094E4;
+  --cx-seq-4: #A874D6;
+  --cx-seq-5: #8B54C4;
 
   --radius: 0.75rem;
 }
@@ -88,6 +96,13 @@
   --ch-instagram: #DB5077;
   --pos: #6BCB8F;
   --neg: #E8756B;
+  --warn: #E0A23C;
+
+  --cx-seq-1: #332B3E;
+  --cx-seq-2: #4B3663;
+  --cx-seq-3: #6E4E96;
+  --cx-seq-4: #9166C2;
+  --cx-seq-5: #B78BE0;
 }
 
 @theme inline {
@@ -123,6 +138,7 @@
   --color-ch-instagram: var(--ch-instagram);
   --color-pos: var(--pos);
   --color-neg: var(--neg);
+  --color-warn: var(--warn);
 
   --radius-sm: calc(var(--radius) - 8px);
   --radius-md: calc(var(--radius) - 4px);

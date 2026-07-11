@@ -1,146 +1,96 @@
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/theme-toggle'
 
-const CHANNELS = [
-  { name: 'Shopify', value: '₩182M', color: 'var(--ch-shopify)' },
-  { name: 'Meta', value: '₩96M', color: 'var(--ch-meta)' },
-  { name: 'YouTube', value: '₩42M', color: 'var(--ch-youtube)' },
-  { name: 'TikTok', value: '₩33M', color: 'var(--ch-tiktok)' },
-  { name: 'Naver', value: '₩78M', color: 'var(--ch-naver)' },
-]
-
-const KPIS = [
-  { label: '총 매출 · 7D', value: '₩431.0M', delta: '▲ 9.2%', spark: '2,12 12,10 22,11 32,6 42,4 48,3' },
-  { label: '평균 ROAS', value: '3.9x', delta: '▲ 0.3', spark: '2,9 12,10 22,8 32,7 42,6 48,5' },
-  { label: '전환', value: '12,480', delta: '▲ 6.1%', spark: '2,11 12,9 22,10 32,7 42,6 48,4' },
-]
+const CHANNELS = ['Shopify', 'Meta', 'YouTube', 'TikTok', 'Naver']
 
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-          <div className="font-display text-[19px] font-extrabold tracking-tight">
-            CONNEXT<span className="text-cx-accent">.</span>
-          </div>
-          <nav className="hidden items-center gap-6 font-mono text-xs text-muted-foreground md:flex">
-            <a href="#" className="hover:text-foreground transition-colors">채널</a>
-            <a href="#" className="hover:text-foreground transition-colors">대시보드</a>
-            <a href="#" className="hover:text-foreground transition-colors">가격</a>
-            <a href="#" className="hover:text-foreground transition-colors">문서</a>
-          </nav>
-          <div className="flex items-center gap-2.5">
-            <ThemeToggle />
-            <Link href="/login" className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors">
-              로그인
-            </Link>
-            <Link
-              href="/signup"
-              className="bg-primary px-3 py-2 font-mono text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-            >
-              시작하기
-            </Link>
-          </div>
+      <header className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <div className="font-display text-[20px] font-semibold tracking-tight">
+          Connext<span className="text-cx-accent">.</span>
+        </div>
+        <nav className="hidden items-center gap-7 font-mono text-[12.5px] text-muted-foreground md:flex">
+          <a href="#" className="transition-colors hover:text-foreground">채널</a>
+          <Link href="/demo" className="transition-colors hover:text-foreground">데모</Link>
+          <a href="#" className="transition-colors hover:text-foreground">가격</a>
+        </nav>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link
+            href="/signup"
+            className="rounded-full bg-primary px-4.5 py-2 font-sans text-[13px] font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            시작하기
+          </Link>
         </div>
       </header>
 
-      <section className="mx-auto max-w-6xl px-5 pt-16 pb-8">
-        <p className="mb-4 font-mono text-xs tracking-[0.12em] text-cx-accent">[ 실시간 · 7개 채널 · 1개 대시보드 ]</p>
-        <h1 className="max-w-[18ch] font-sans text-[clamp(34px,6vw,56px)] font-extrabold leading-[1.05] tracking-[-0.025em]">
-          흩어진 채널 데이터를,
-          <br />
-          <span className="text-cx-accent">실시간 대시보드</span>로.
-        </h1>
-        <p className="mt-5 max-w-[46ch] text-[15px] leading-relaxed text-muted-foreground">
-          Shopify · Meta · YouTube · TikTok · Naver의 매출·광고·전환을 자동으로 수집해 한 화면에서 추적합니다. 코딩 없이.
+      <section className="mx-auto max-w-3xl px-6 pt-24 pb-12 text-center">
+        <p className="mb-6 font-mono text-[12px] uppercase tracking-[0.16em] text-muted-foreground">
+          Cross-platform data analytics
         </p>
-        <div className="mt-7 flex flex-wrap items-center gap-3">
+        <h1 className="font-display text-[clamp(32px,5.5vw,52px)] font-medium leading-[1.12] tracking-[-0.02em]">
+          흩어진 채널을,
+          <br />
+          <span
+            style={{
+              background: 'linear-gradient(transparent 66%, color-mix(in srgb, var(--cx-accent) 42%, transparent) 66%)',
+            }}
+          >
+            하나의 이해
+          </span>
+          로.
+        </h1>
+        <p className="mx-auto mt-6 max-w-[34em] font-sans text-[16px] font-light leading-[1.6] text-muted-foreground">
+          Shopify · Meta · YouTube · TikTok · Naver의 매출·광고·콘텐츠·오디언스를 한 곳에서. 흐름과 상관관계까지 자동으로 읽어드려요.
+        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/signup"
-            className="bg-primary px-5 py-3 font-sans text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+            className="rounded-full bg-primary px-7 py-3.5 font-sans text-[15px] font-medium text-primary-foreground transition-opacity hover:opacity-90"
           >
-            무료로 연결하기 →
+            무료로 시작하기
           </Link>
-          <a href="#demo" className="border border-border px-5 py-3 font-sans text-sm transition-colors hover:bg-secondary">
-            라이브 데모
-          </a>
+          <Link
+            href="/demo"
+            className="rounded-full border border-border px-6 py-3.5 font-sans text-[15px] transition-colors hover:bg-secondary"
+          >
+            데모 체험하기
+          </Link>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 pb-24">
-        <div className="border border-border bg-card">
-          <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">채널별 매출 · 최근 7일</span>
-              <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-cx-accent">
-                <span className="size-1.5 rounded-full bg-cx-accent animate-pulse" />
-                LIVE 14:32:07
-              </span>
-            </div>
-            <div className="flex border border-border font-mono text-[11px]">
-              <span className="bg-secondary px-2.5 py-1 text-foreground">7D</span>
-              <span className="px-2.5 py-1 text-muted-foreground">30D</span>
-              <span className="px-2.5 py-1 text-muted-foreground">90D</span>
-            </div>
+      <section className="mx-auto max-w-3xl px-6 pb-28">
+        <Link
+          href="/demo"
+          className="block rounded-2xl border border-border p-5 transition-colors hover:border-cx-accent/50"
+          style={{ background: 'linear-gradient(180deg, color-mix(in srgb, var(--cx-accent) 5%, transparent), transparent 55%)' }}
+        >
+          <div className="mb-2 flex items-center justify-between">
+            <span className="font-mono text-[11.5px] tracking-wide text-muted-foreground">채널별 흐름 · 샘플 미리보기</span>
+            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-cx-accent">
+              데모 체험하기 →
+            </span>
           </div>
-
-          <div className="px-3 pt-3">
-            <svg className="block w-full" style={{ height: 210 }} viewBox="0 0 600 178" preserveAspectRatio="none" fill="none">
-              {[14, 48, 82, 116].map((y) => (
-                <line key={y} x1="46" y1={y} x2="590" y2={y} style={{ stroke: 'var(--cx-grid)' }} strokeWidth="1" />
-              ))}
-              <line x1="46" y1="150" x2="590" y2="150" style={{ stroke: 'var(--border)' }} strokeWidth="1" />
-              <polygon
-                points="46,75 136,63 226,68 317,48 407,38 498,33 588,26 588,150 46,150"
-                style={{ fill: 'var(--cx-accent)', fillOpacity: 0.12 }}
-              />
-              <polyline points="46,85 136,89 226,83 317,90 407,93 498,89 588,85" style={{ stroke: 'var(--ch-meta)' }} strokeWidth="1.5" />
-              <polyline points="46,130 136,127 226,124 317,126 407,123 498,122 588,121" style={{ stroke: 'var(--ch-youtube)' }} strokeWidth="1.5" />
-              <polyline points="46,142 136,140 226,138 317,135 407,132 498,130 588,128" style={{ stroke: 'var(--ch-tiktok)' }} strokeWidth="1.5" />
-              <polyline points="46,102 136,101 226,100 317,102 407,99 498,98 588,98" style={{ stroke: 'var(--ch-naver)' }} strokeWidth="1.5" />
-              <polyline points="46,75 136,63 226,68 317,48 407,38 498,33 588,26" style={{ stroke: 'var(--cx-accent)' }} strokeWidth="2.4" />
-              <line x1="588" y1="14" x2="588" y2="150" style={{ stroke: 'var(--cx-accent)' }} strokeWidth="1" strokeDasharray="3 3" opacity="0.5" />
-              <circle cx="588" cy="26" r="3.5" style={{ fill: 'var(--cx-accent)' }} />
-            </svg>
-            <svg className="block w-full" style={{ height: 18 }} viewBox="0 0 600 16" fill="none">
-              <text x="46" y="11" style={{ fill: 'var(--cx-dim)' }} fontFamily="var(--font-mono)" fontSize="11">06-17</text>
-              <text x="317" y="11" textAnchor="middle" style={{ fill: 'var(--cx-dim)' }} fontFamily="var(--font-mono)" fontSize="11">06-20</text>
-              <text x="590" y="11" textAnchor="end" style={{ fill: 'var(--cx-dim)' }} fontFamily="var(--font-mono)" fontSize="11">06-23</text>
-            </svg>
-          </div>
-
-          <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-border px-4 py-3">
+          <svg className="block w-full" style={{ height: 150 }} viewBox="0 0 600 130" preserveAspectRatio="none" fill="none">
+            <polygon
+              points="10,86 110,74 210,78 310,54 410,46 510,32 590,24 590,120 10,120"
+              style={{ fill: 'var(--cx-accent)', fillOpacity: 0.1 }}
+            />
+            <polyline points="10,100 110,98 210,96 310,94 410,92 510,90 590,88" style={{ stroke: 'var(--ch-meta)' }} strokeWidth="1.4" strokeOpacity="0.5" />
+            <polyline points="10,110 110,108 210,106 310,107 410,105 510,104 590,103" style={{ stroke: 'var(--ch-naver)' }} strokeWidth="1.4" strokeOpacity="0.5" />
+            <polyline points="10,86 110,74 210,78 310,54 410,46 510,32 590,24" style={{ stroke: 'var(--cx-accent)' }} strokeWidth="2.4" />
+            <circle cx="590" cy="24" r="3.6" style={{ fill: 'var(--cx-accent)' }} />
+          </svg>
+          <div className="mt-4 flex flex-wrap gap-2">
             {CHANNELS.map((c) => (
-              <span key={c.name} className="inline-flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
-                <span className="size-2" style={{ background: c.color }} />
-                {c.name} <b className="font-medium text-foreground">{c.value}</b>
+              <span key={c} className="rounded-full border border-border px-3 py-1 font-mono text-[11px] text-muted-foreground">
+                {c}
               </span>
             ))}
           </div>
-        </div>
-
-        <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
-          {KPIS.map((k) => (
-            <div key={k.label} className="border border-border bg-card p-3.5">
-              <p className="mb-1.5 font-mono text-[10.5px] uppercase tracking-wide text-muted-foreground">{k.label}</p>
-              <p className="font-mono text-xl font-semibold tabular-nums">{k.value}</p>
-              <p className="mt-1.5 flex items-center justify-between font-mono text-[11px]">
-                <span style={{ color: 'var(--pos)' }}>{k.delta}</span>
-                <svg width="50" height="15" fill="none">
-                  <polyline points={k.spark} style={{ stroke: 'var(--cx-accent)' }} strokeWidth="1.3" />
-                </svg>
-              </p>
-            </div>
-          ))}
-          <div className="border border-border bg-card p-3.5">
-            <p className="mb-1.5 font-mono text-[10.5px] uppercase tracking-wide text-muted-foreground">동기화 상태</p>
-            <p className="font-mono text-xl font-semibold tabular-nums">7/7</p>
-            <p className="mt-1.5 flex items-center justify-between font-mono text-[11px]">
-              <span style={{ color: 'var(--pos)' }}>실시간 ●</span>
-              <span className="text-cx-dim">14:32</span>
-            </p>
-          </div>
-        </div>
+        </Link>
       </section>
     </main>
   )

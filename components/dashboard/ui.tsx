@@ -32,7 +32,7 @@ export function BarRow({ label, value, pct, title }: { label: string; value: str
           style={{ width: `${Math.max(pct, 0)}%` }}
         />
       </span>
-      <span className="w-24 text-right text-xs tabular-nums">{value}</span>
+      <span className="shrink-0 whitespace-nowrap text-right text-xs tabular-nums">{value}</span>
     </li>
   )
 }

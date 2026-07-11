@@ -15,10 +15,14 @@ function getFormatter(key: string, make: () => Intl.NumberFormat): Intl.NumberFo
   return f
 }
 
+// KRW reads naturally in Korean digit grouping (만·억 in compact form) — pick
+// the locale from the currency, not the UI language.
+const localeFor = (currency: string) => (currency === 'KRW' ? 'ko-KR' : 'en-US')
+
 export function fmtCurrency(n: number, currency = 'USD'): string {
-  const whole = n >= 100_000
+  const whole = n >= 100_000 || currency === 'KRW'
   return getFormatter(`cur:${currency}:${whole}`, () =>
-    new Intl.NumberFormat('en-US', {
+    new Intl.NumberFormat(localeFor(currency), {
       style: 'currency',
       currency,
       maximumFractionDigits: whole ? 0 : 2,
@@ -36,10 +40,11 @@ export function fmtCompact(n: number): string {
   ).format(n || 0)
 }
 
-// Compact money for axis ticks ("$8.4M") — full precision stays in tooltips/tables.
+// Compact money for axis ticks ("$8.4M" / "₩2.9억") — full precision stays in
+// tooltips/tables.
 export function fmtCompactCurrency(n: number, currency = 'USD'): string {
   return getFormatter(`curc:${currency}`, () =>
-    new Intl.NumberFormat('en-US', {
+    new Intl.NumberFormat(localeFor(currency), {
       style: 'currency',
       currency,
       notation: 'compact',
