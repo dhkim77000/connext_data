@@ -7,6 +7,7 @@ export interface ConnectorCredentials {
 
 export interface FetchJob {
   tenantId: string
+  connectionId: string
   connectorId: string
   credentials: ConnectorCredentials
   dataType: string

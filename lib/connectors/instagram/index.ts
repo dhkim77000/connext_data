@@ -24,7 +24,14 @@ export const instagramConnector: Connector = {
   authType: 'oauth2',
 
   targetTable(dataType: string): string {
-    return `instagram_${dataType}`
+    // v2 warehouse naming (docs/specs/2026-07-05-warehouse-schema-v2.sql)
+    const map: Record<string, string> = {
+      media: 'instagram_media',                                    // current-state snapshot
+      account_insights: 'instagram_account_insights_stat',         // vendor daily time-series
+    }
+    const table = map[dataType]
+    if (!table) throw new Error(`Instagram connector: no target table for dataType "${dataType}"`)
+    return table
   },
 
   async fetch(job: FetchJob): Promise<FetchResult> {
@@ -48,6 +55,7 @@ export const instagramConnector: Connector = {
       return {
         rows: data.map((m) => ({
           tenant_id: job.tenantId,
+          connection_id: job.connectionId,
           raw: JSON.stringify(m),
           media_id: m.id,
           ig_user_id: igUserId,
@@ -91,6 +99,7 @@ export const instagramConnector: Connector = {
       return {
         rows: [...byDate.entries()].map(([date, m]) => ({
           tenant_id: job.tenantId,
+          connection_id: job.connectionId,
           raw: JSON.stringify(m),
           ig_user_id: igUserId,
           date,

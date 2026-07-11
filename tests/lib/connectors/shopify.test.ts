@@ -8,6 +8,7 @@ import type { FetchJob } from '@/lib/connectors/types'
 
 const baseJob: FetchJob = {
   tenantId: 'tenant-1',
+  connectionId: 'conn-1',
   connectorId: 'shopify',
   credentials: {
     accessToken: 'shpat_test123',
@@ -26,12 +27,67 @@ describe('shopifyConnector', () => {
     expect(shopifyConnector.authType).toBe('oauth2')
   })
 
-  it('maps orders to shopify_orders table', () => {
-    expect(shopifyConnector.targetTable('orders')).toBe('shopify_orders')
+  it('maps orders to shopify_orders_history table', () => {
+    expect(shopifyConnector.targetTable('orders')).toBe('shopify_orders_history')
   })
 
   it('maps products to shopify_products table', () => {
     expect(shopifyConnector.targetTable('products')).toBe('shopify_products')
+  })
+
+  it('maps new dataTypes to their v2 tables', () => {
+    expect(shopifyConnector.targetTable('order_line_items')).toBe('shopify_order_line_items_history')
+    expect(shopifyConnector.targetTable('product_variants')).toBe('shopify_product_variants')
+    expect(shopifyConnector.targetTable('customers')).toBe('shopify_customers')
+  })
+
+  it('fetches customers and maps geography + LTV (PII may be redacted)', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        customers: [{
+          id: 55, admin_graphql_api_id: 'gid://shopify/Customer/55',
+          state: 'enabled', orders_count: 3, total_spent: '150.00', currency: 'USD',
+          tags: 'VIP, wholesale', verified_email: true, tax_exempt: false,
+          default_address: { country_code: 'US', province: 'California', city: 'LA' },
+          email_marketing_consent: { state: 'subscribed' },
+          created_at: '2026-01-01T00:00:00Z', updated_at: '2026-02-01T00:00:00Z',
+        }],
+      }),
+      headers: { get: () => null, has: () => false },
+    })
+    const row = (await shopifyConnector.fetch({ ...baseJob, dataType: 'customers' })).rows[0]
+    expect(row.customer_id).toBe('55')
+    expect(row.connection_id).toBe('conn-1')
+    expect(row.country_code).toBe('US')
+    expect(row.amount_spent).toBe(150)
+    expect(row.number_of_orders).toBe(3)
+    expect(row.email_marketing_state).toBe('subscribed')
+    expect(row.tags).toEqual(['VIP', 'wholesale'])
+    expect(row.email).toBe('') // redacted → default
+  })
+
+  it('fetches order_line_items and flattens one row per line with the parent order id', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        orders: [{
+          id: 900, created_at: '2026-07-04T00:00:00Z',
+          line_items: [
+            { id: 1, product_id: 11, variant_id: 111, title: 'A', quantity: 2, price: '10.00' },
+            { id: 2, product_id: 22, variant_id: 222, title: 'B', quantity: 1, price: '5.00' },
+          ],
+        }],
+      }),
+      headers: { get: () => null, has: () => false },
+    })
+    const result = await shopifyConnector.fetch({ ...baseJob, dataType: 'order_line_items' })
+    expect(result.rows).toHaveLength(2)
+    expect(result.rows[0].order_id).toBe('900')
+    expect(result.rows[0].line_item_id).toBe('1')
+    expect(result.rows[0].quantity).toBe(2)
+    expect(result.rows[1].line_item_id).toBe('2')
+    expect(result.rows[1].price).toBe(5)
   })
 
   it('fetches orders and returns normalized rows with raw field', async () => {
@@ -57,9 +113,10 @@ describe('shopifyConnector', () => {
     expect(result.rows).toHaveLength(1)
     const row = result.rows[0]
     expect(row.tenant_id).toBe('tenant-1')
+    expect(row.connection_id).toBe('conn-1')
     expect(row.order_id).toBe('12345')
     expect(row.raw).toBe(JSON.stringify(apiOrder))
-    expect(row.total_price).toBe(99.99)
+    expect(row.current_total_price).toBe(99.99)
     expect(result.nextCursor).toBeUndefined()
   })
 
@@ -84,5 +141,44 @@ describe('shopifyConnector', () => {
   it('throws when shop_url is missing from credentials', async () => {
     const badJob: FetchJob = { ...baseJob, credentials: { accessToken: 'tok' } }
     await expect(shopifyConnector.fetch(badJob)).rejects.toThrow('shop_url')
+  })
+
+  it('refreshes the access token via grant_type=refresh_token and keeps the rotated refresh_token', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        access_token: 'shpat_new',
+        refresh_token: 'shprt_new',
+        expires_in: 3600,
+        refresh_token_expires_in: 7776000,
+      }),
+    })
+    process.env.SHOPIFY_CLIENT_ID = 'cid'
+    process.env.SHOPIFY_CLIENT_SECRET = 'csec'
+
+    const nowSec = Math.floor(Date.now() / 1000)
+    const newCreds = await shopifyConnector.refreshCredentials!({
+      accessToken: 'shpat_old',
+      refreshToken: 'shprt_old',
+      expiresAt: nowSec,
+      extra: { shop_url: 'teststore.myshopify.com', refresh_token_expires_at: '1' },
+    })
+
+    expect(newCreds.accessToken).toBe('shpat_new')
+    expect(newCreds.refreshToken).toBe('shprt_new') // rotated — new one kept
+    expect(newCreds.expiresAt).toBeGreaterThan(nowSec) // ~now + 3600
+    expect(newCreds.extra?.shop_url).toBe('teststore.myshopify.com') // connection extra preserved
+
+    const [url, opts] = mockFetch.mock.calls[0]
+    expect(url).toBe('https://teststore.myshopify.com/admin/oauth/access_token')
+    const body = JSON.parse((opts as { body: string }).body)
+    expect(body.grant_type).toBe('refresh_token')
+    expect(body.refresh_token).toBe('shprt_old')
+  })
+
+  it('refreshCredentials throws when refresh_token is missing', async () => {
+    await expect(
+      shopifyConnector.refreshCredentials!({ accessToken: 't', extra: { shop_url: 's.myshopify.com' } })
+    ).rejects.toThrow('refresh_token')
   })
 })

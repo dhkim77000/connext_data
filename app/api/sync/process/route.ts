@@ -2,11 +2,11 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { processJob } from '@/lib/worker/processor'
-import { registerConnector } from '@/lib/connectors/registry'
+import { registerConnector, getConnector } from '@/lib/connectors/registry'
 import { shopifyConnector } from '@/lib/connectors/shopify'
 import { metaAdsConnector } from '@/lib/connectors/meta-ads'
 import { instagramConnector } from '@/lib/connectors/instagram'
-import type { FetchJob } from '@/lib/connectors/types'
+import type { ConnectorCredentials, FetchJob } from '@/lib/connectors/types'
 
 registerConnector(shopifyConnector)
 registerConnector(metaAdsConnector)
@@ -42,21 +42,47 @@ export async function POST(request: Request) {
   const connExtra = (syncJob.channel_connections as unknown as Record<string, unknown> | null)
     ?.extra as Record<string, string> | undefined
 
-  const job: FetchJob = {
-    tenantId: syncJob.tenant_id,
-    connectorId: syncJob.connector_id,
-    credentials: {
-      accessToken: cred.access_token,
-      refreshToken: cred.refresh_token ?? undefined,
-      expiresAt: cred.expires_at ?? undefined,
-      extra: { ...connExtra, ...(cred.extra as Record<string, string>) },
-    },
-    dataType: syncJob.data_type,
-    since: new Date(syncJob.since!),
-    until: new Date(syncJob.until!),
+  let credentials: ConnectorCredentials = {
+    accessToken: cred.access_token,
+    refreshToken: cred.refresh_token ?? undefined,
+    expiresAt: cred.expires_at ?? undefined,
+    extra: { ...connExtra, ...(cred.extra as Record<string, string>) },
   }
 
   try {
+    // Refresh the access token if it's expired or within 2 min of expiring, so it can't
+    // die mid-sync. Persist the rotated creds BEFORE fetching — Shopify rotates the
+    // refresh_token on each refresh, and losing the new one orphans the connection.
+    const connector = getConnector(syncJob.connector_id)
+    const nowSec = Math.floor(Date.now() / 1000)
+    if (
+      connector.refreshCredentials &&
+      credentials.refreshToken &&
+      credentials.expiresAt &&
+      credentials.expiresAt < nowSec + 120
+    ) {
+      credentials = await connector.refreshCredentials(credentials)
+      await service.from('channel_credentials').update({
+        access_token: credentials.accessToken,
+        refresh_token: credentials.refreshToken ?? null,
+        expires_at: credentials.expiresAt ?? null,
+        // keep channel_credentials.extra token-scoped (shop_url lives on the connection)
+        extra: credentials.extra?.refresh_token_expires_at
+          ? { refresh_token_expires_at: credentials.extra.refresh_token_expires_at }
+          : {},
+      }).eq('connection_id', syncJob.connection_id)
+    }
+
+    const job: FetchJob = {
+      tenantId: syncJob.tenant_id,
+      connectionId: syncJob.connection_id,
+      connectorId: syncJob.connector_id,
+      credentials,
+      dataType: syncJob.data_type,
+      since: new Date(syncJob.since!),
+      until: new Date(syncJob.until!),
+    }
+
     const result = await processJob(job)
     await service.from('sync_jobs').update({
       status: 'done',

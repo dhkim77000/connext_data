@@ -2,13 +2,9 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { queryRows } from '@/lib/clickhouse/queries'
+import { DATA_VIEWER_TABLES, DEFAULT_DATA_VIEWER_TABLE } from '@/lib/warehouse-tables'
 
-const ALLOWED_TABLES = new Set([
-  'shopify_orders',
-  'shopify_products',
-  'meta_ads_campaigns',
-  'meta_ads_insights',
-])
+const ALLOWED_TABLES = new Set<string>(DATA_VIEWER_TABLES.map((t) => t.value))
 
 export async function GET(request: Request) {
   const supabase = await createClient()
@@ -22,7 +18,7 @@ export async function GET(request: Request) {
   if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 })
 
   const { searchParams } = new URL(request.url)
-  const table = searchParams.get('table') ?? 'shopify_orders'
+  const table = searchParams.get('table') ?? DEFAULT_DATA_VIEWER_TABLE
   const limit = Math.min(Number(searchParams.get('limit') ?? '50'), 200)
 
   if (!ALLOWED_TABLES.has(table)) {

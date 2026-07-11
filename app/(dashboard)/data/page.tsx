@@ -3,16 +3,10 @@
 
 import { useEffect, useState } from 'react'
 import { DataTable } from '@/components/data-table'
-
-const TABLES = [
-  { value: 'shopify_orders', label: 'Shopify Orders' },
-  { value: 'shopify_products', label: 'Shopify Products' },
-  { value: 'meta_ads_campaigns', label: 'Meta Campaigns' },
-  { value: 'meta_ads_insights', label: 'Meta Insights' },
-]
+import { DATA_VIEWER_TABLES, DEFAULT_DATA_VIEWER_TABLE } from '@/lib/warehouse-tables'
 
 export default function DataPage() {
-  const [table, setTable] = useState('shopify_orders')
+  const [table, setTable] = useState<string>(DEFAULT_DATA_VIEWER_TABLE)
   const [rows, setRows] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,7 +33,7 @@ export default function DataPage() {
           onChange={(e) => setTable(e.target.value)}
           className="rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         >
-          {TABLES.map((t) => (
+          {DATA_VIEWER_TABLES.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>
           ))}
         </select>

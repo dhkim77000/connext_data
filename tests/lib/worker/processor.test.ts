@@ -14,6 +14,7 @@ import type { FetchJob } from '@/lib/connectors/types'
 
 const baseJob: FetchJob = {
   tenantId: 'tenant-1',
+  connectionId: 'conn-1',
   connectorId: 'shopify',
   credentials: { accessToken: 'tok', extra: { shop_url: 'x.myshopify.com' } },
   dataType: 'orders',
@@ -31,12 +32,12 @@ describe('processJob', () => {
       displayName: 'Shopify',
       authType: 'oauth2',
       fetch: vi.fn().mockResolvedValue({ rows, nextCursor: undefined }),
-      targetTable: () => 'shopify_orders',
+      targetTable: () => 'shopify_orders_history',
     })
 
     const result = await processJob(baseJob)
 
-    expect(insertRows).toHaveBeenCalledWith('shopify_orders', rows)
+    expect(insertRows).toHaveBeenCalledWith('shopify_orders_history', rows)
     expect(result.rowsIngested).toBe(1)
     expect(result.pages).toBe(1)
   })
@@ -51,7 +52,7 @@ describe('processJob', () => {
     vi.mocked(getConnector).mockReturnValue({
       id: 'shopify', displayName: 'Shopify', authType: 'oauth2',
       fetch: mockFetch,
-      targetTable: () => 'shopify_orders',
+      targetTable: () => 'shopify_orders_history',
     })
 
     const result = await processJob(baseJob)
@@ -65,7 +66,7 @@ describe('processJob', () => {
     vi.mocked(getConnector).mockReturnValue({
       id: 'shopify', displayName: 'Shopify', authType: 'oauth2',
       fetch: vi.fn().mockResolvedValue({ rows: [], nextCursor: undefined }),
-      targetTable: () => 'shopify_orders',
+      targetTable: () => 'shopify_orders_history',
     })
 
     await processJob(baseJob)

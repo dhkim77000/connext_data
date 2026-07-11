@@ -8,6 +8,7 @@ import type { FetchJob } from '@/lib/connectors/types'
 
 const baseJob: FetchJob = {
   tenantId: 'tenant-1',
+  connectionId: 'conn-1',
   connectorId: 'meta_ads',
   credentials: {
     accessToken: 'EAAtest123',
@@ -30,8 +31,8 @@ describe('metaAdsConnector', () => {
     expect(metaAdsConnector.targetTable('campaigns')).toBe('meta_ads_campaigns')
   })
 
-  it('maps insights to meta_ads_insights table', () => {
-    expect(metaAdsConnector.targetTable('insights')).toBe('meta_ads_insights')
+  it('maps insights to meta_ads_insights_stat table', () => {
+    expect(metaAdsConnector.targetTable('insights')).toBe('meta_ads_insights_stat')
   })
 
   it('fetches campaigns and returns normalized rows with raw field', async () => {

@@ -24,7 +24,14 @@ export const metaAdsConnector: Connector = {
   authType: 'oauth2',
 
   targetTable(dataType: string): string {
-    return `meta_ads_${dataType}`
+    // v2 warehouse naming (docs/specs/2026-07-05-warehouse-schema-v2.sql)
+    const map: Record<string, string> = {
+      campaigns: 'meta_ads_campaigns',        // current-state snapshot
+      insights: 'meta_ads_insights_stat',     // vendor daily time-series
+    }
+    const table = map[dataType]
+    if (!table) throw new Error(`Meta Ads connector: no target table for dataType "${dataType}"`)
+    return table
   },
 
   async fetch(job: FetchJob): Promise<FetchResult> {
@@ -47,6 +54,7 @@ export const metaAdsConnector: Connector = {
       return {
         rows: data.map((c) => ({
           tenant_id: job.tenantId,
+          connection_id: job.connectionId,
           raw: JSON.stringify(c),
           campaign_id: c.id,
           account_id: c.account_id,
@@ -80,6 +88,7 @@ export const metaAdsConnector: Connector = {
       return {
         rows: data.map((i) => ({
           tenant_id: job.tenantId,
+          connection_id: job.connectionId,
           raw: JSON.stringify(i),
           ad_id: i.ad_id,
           account_id: i.account_id,
