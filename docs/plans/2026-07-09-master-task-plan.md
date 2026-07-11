@@ -51,7 +51,7 @@ Phase 1(기반 + Shopify/Meta)은 완료. 지금 제품은 "**수동 버튼을 �
 | 싱크 파이프라인 | 🔶 | 수동 트리거 + 비동기 처리 + 페이지네이션 루프까지. **스케줄링·증분 워터마크·백필·재시도·레이트리밋 백오프 전부 없음** (7일 고정 윈도우) |
 | 웨어하우스 스키마 | ✅ | v2 DDL(snapshot/`_history`/`_stat` 체계) 확정, Shopify·Meta·IG 테이블 가동. 라이브 드리프트 0 확인·`pnpm check:drift` 상설화, ddl.sql은 v2 포인터로 정리 (E2.1 완료 2026-07-10) |
 | 애널리틱스/DS | ⬜ | 대시보드 내 Shopify 단일 채널 집계 쿼리만 존재. 크로스채널·identity·demographic·파생 테이블 없음 |
-| 대시보드 UI | 🔶 | Shopify 홈 대시보드(16개 지표) + 채널 관리 + 원본 데이터 뷰어 라이브. 채널별 대시보드는 라우트만. 차트는 커스텀 CSS 수준 |
+| 대시보드 UI | 🔶 | Shopify 홈 + Meta/IG 채널 대시보드 + 원본 데이터 뷰어 라이브. 인터랙티브 차트 키트(`components/charts/` — 툴팁·토글·모션) 적용 완료(4.4.1). 크로스채널 홈·전역 필터는 미착수 |
 | 디자인 | 🔶 | Hume 피벗(라이트 위주·라벤더·Manrope/Pretendard/Spline Sans Mono) 토큰·랜딩 적용. 대시보드 내부는 pill/여백 리파인 미완 |
 
 **알려진 불일치 (문서 ↔ 코드):**
@@ -336,14 +336,14 @@ Phase 1(기반 + Shopify/Meta)은 완료. 지금 제품은 "**수동 버튼을 �
 
 | ID | 태스크 | 내용 | 우선 |
 |---|---|---|---|
-| 4.3.1 | ⬜ 대시보드 Hume 리파인 | dashboard/channels/connect-wizard에 pill·radius 12px·여백 규칙 일관 적용, 라이트/다크 브라우저 검증 | P1 |
+| 4.3.1 | 🔶 대시보드 Hume 리파인 | dashboard 3탭: 모션 시스템(스태거 진입·드로우인·카운트업·마이크로 인터랙션)·스켈레톤 로딩·focus-visible·`--ch-instagram` 토큰 적용, 라이트/다크/모바일 브라우저 검증 완료 (2026-07-10). **남음:** channels·connect-wizard 화면 리파인 | P1 |
 | 4.3.2 | ⬜ 접근성 패스 | 색상 단독 상태표시 금지(아이콘+라벨), ARIA-live(실시간 값), 키보드 조작, WCAG AA | P1 |
 
 #### E4.4 차트 & 조작성 인프라 — 규모 M
 
 | ID | 태스크 | 내용 | 우선 |
 |---|---|---|---|
-| 4.4.1 | 🧭→⬜ 차트 레이어 결정·구축 | 현재 커스텀 CSS 스파크라인뿐. 커스텀 SVG 유지 vs 경량 라이브러리 도입 결정 후, 공통 차트 컴포넌트(라인·바·툴팁·기간축) 구축 | P0 |
+| 4.4.1 | ✅ 차트 레이어 결정·구축 | **결정: 커스텀 SVG** (의존성 0, Hume 마크 스펙 소유, ADR은 `docs/superpowers/plans/2026-07-10-chart-kit-and-motion.md`). `components/charts/` 키트 구축: TimeSeriesChart(크로스헤어 툴팁·레전드 토글·원축 원칙), TrendExplorer(메트릭 스위처), HourBars, AnimatedNumber + 모션 시스템(globals.css, reduced-motion 대응) + 스케일 수학 vitest. 대시보드 3종 적용, 팔레트는 dataviz 검증기 통과(다크 `--ch-*` 스냅). (2026-07-10 완료) | P0 |
 | 4.4.2 | ⬜ 전역 필터 | 기간 선택(프리셋+커스텀) + 채널 필터 — 모든 패널 공통 상태 | P1 |
 | 4.4.3 | ⬜ 크로스필터 & 드릴다운 | 레전드/세그먼트 클릭 → 연동 필터링, 드릴 경로 브레드크럼 | P2 |
 | 4.4.4 | ⬜ CSV 내보내기 | 테이블·차트 데이터 다운로드 | P2 |
@@ -443,7 +443,6 @@ graph LR
 |---|---|---|
 | 🧭 스케줄러 선택 | Vercel Cron+Queues vs Workflow DevKit vs BullMQ — 장시간 백필·재시도 요건이 결정 기준 | 1.2.1 |
 | 🧭 분석 런타임 | CH 뷰 vs Python 배치 vs 혼합 + `derived_*` 네이밍 확정 | 3.0.1 |
-| 🧭 차트 레이어 | 커스텀 SVG 유지 vs 라이브러리 | 4.4.1 |
 | 🧭 자격증명 암호화 | Vault 도입 시점 | 1.3.3 |
 | ⚠️ 외부 승인 리드타임 | Shopify Protected Customer Data 승인, Google Ads Basic access, Kakao 파트너 승인 — **먼저 신청 걸어두고 개발은 병행** | 1.1.x |
 | ⚠️ Meta 개발모드 리밋 | 라이브 테스트 버스트 시 앱 전체 차단 이력 — 테스트는 pytest 우선 | 전역 |
