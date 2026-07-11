@@ -1,22 +1,23 @@
-// 한국어 인사이트 카드 — kind 칩(텍스트+색, 색상 단독 금지) + 평이한 문장 + 근거.
-// 상관계수·내부 지표 원값은 노출하지 않는다(마스터 플랜 3.6.4).
+// Insight card — kind chip (text + color, never color alone) + a plain-language
+// sentence + evidence. Raw correlation values are never shown (master plan 3.6.4).
 
 import { Panel } from '@/components/dashboard/ui'
 import type { DemoInsight } from '@/lib/demo/data'
 
-const KIND_STYLE: Record<DemoInsight['kind'], string> = {
-  기회: 'text-pos border-pos/30',
-  주의: 'text-warn border-warn/40',
-  알림: 'text-muted-foreground border-border',
+const KIND: Record<DemoInsight['kind'], { label: string; className: string }> = {
+  opportunity: { label: 'Opportunity', className: 'text-pos border-pos/30' },
+  watch: { label: 'Watch', className: 'text-warn border-warn/40' },
+  note: { label: 'Note', className: 'text-muted-foreground border-border' },
 }
 
 export function InsightCard({ insight, className = '' }: { insight: DemoInsight; className?: string }) {
+  const kind = KIND[insight.kind]
   return (
     <Panel className={`flex flex-col gap-2.5 ${className}`}>
       <span
-        className={`inline-flex w-fit items-center rounded-full border px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] ${KIND_STYLE[insight.kind]}`}
+        className={`inline-flex w-fit items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] ${kind.className}`}
       >
-        {insight.kind}
+        {kind.label}
       </span>
       <p className="text-[15px] font-medium leading-snug">{insight.title}</p>
       <p className="text-sm leading-relaxed text-muted-foreground">{insight.body}</p>

@@ -5,10 +5,10 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 const TABS = [
-  { href: '/demo', label: '홈' },
-  { href: '/demo/channels', label: '채널' },
-  { href: '/demo/advanced', label: '어드밴스드' },
-  { href: '/demo/cross', label: '크로스플랫폼' },
+  { href: '/demo', label: 'Overview' },
+  { href: '/demo/channels', label: 'Channels' },
+  { href: '/demo/advanced', label: 'Advanced' },
+  { href: '/demo/cross', label: 'Cross-platform' },
 ]
 
 export function DemoTabs() {

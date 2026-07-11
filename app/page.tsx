@@ -11,9 +11,9 @@ export default function LandingPage() {
           Connext<span className="text-cx-accent">.</span>
         </div>
         <nav className="hidden items-center gap-7 font-mono text-[12.5px] text-muted-foreground md:flex">
-          <a href="#" className="transition-colors hover:text-foreground">채널</a>
-          <Link href="/demo" className="transition-colors hover:text-foreground">데모</Link>
-          <a href="#" className="transition-colors hover:text-foreground">가격</a>
+          <a href="#" className="transition-colors hover:text-foreground">Channels</a>
+          <Link href="/demo" className="transition-colors hover:text-foreground">Demo</Link>
+          <a href="#" className="transition-colors hover:text-foreground">Pricing</a>
         </nav>
         <div className="flex items-center gap-3">
           <ThemeToggle />
@@ -21,7 +21,7 @@ export default function LandingPage() {
             href="/signup"
             className="rounded-full bg-primary px-4.5 py-2 font-sans text-[13px] font-medium text-primary-foreground transition-opacity hover:opacity-90"
           >
-            시작하기
+            Get started
           </Link>
         </div>
       </header>
@@ -31,32 +31,33 @@ export default function LandingPage() {
           Cross-platform data analytics
         </p>
         <h1 className="font-display text-[clamp(32px,5.5vw,52px)] font-medium leading-[1.12] tracking-[-0.02em]">
-          흩어진 채널을,
+          Scattered channels,
           <br />
           <span
             style={{
               background: 'linear-gradient(transparent 66%, color-mix(in srgb, var(--cx-accent) 42%, transparent) 66%)',
             }}
           >
-            하나의 이해
+            one understanding
           </span>
-          로.
+          .
         </h1>
         <p className="mx-auto mt-6 max-w-[34em] font-sans text-[16px] font-light leading-[1.6] text-muted-foreground">
-          Shopify · Meta · YouTube · TikTok · Naver의 매출·광고·콘텐츠·오디언스를 한 곳에서. 흐름과 상관관계까지 자동으로 읽어드려요.
+          Sales, ads, content and audience from Shopify · Meta · YouTube · TikTok · Naver in one place —
+          with the flows and correlations read for you.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/signup"
             className="rounded-full bg-primary px-7 py-3.5 font-sans text-[15px] font-medium text-primary-foreground transition-opacity hover:opacity-90"
           >
-            무료로 시작하기
+            Start free
           </Link>
           <Link
             href="/demo"
             className="rounded-full border border-border px-6 py-3.5 font-sans text-[15px] transition-colors hover:bg-secondary"
           >
-            데모 체험하기
+            Try the demo
           </Link>
         </div>
       </section>
@@ -68,9 +69,9 @@ export default function LandingPage() {
           style={{ background: 'linear-gradient(180deg, color-mix(in srgb, var(--cx-accent) 5%, transparent), transparent 55%)' }}
         >
           <div className="mb-2 flex items-center justify-between">
-            <span className="font-mono text-[11.5px] tracking-wide text-muted-foreground">채널별 흐름 · 샘플 미리보기</span>
+            <span className="font-mono text-[11.5px] tracking-wide text-muted-foreground">Channel flows · sample preview</span>
             <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-cx-accent">
-              데모 체험하기 →
+              Try the demo →
             </span>
           </div>
           <svg className="block w-full" style={{ height: 150 }} viewBox="0 0 600 130" preserveAspectRatio="none" fill="none">

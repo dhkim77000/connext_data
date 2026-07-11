@@ -68,7 +68,7 @@ export function Heatmap({
           <div
             ref={wrapRef}
             role="img"
-            aria-label={`${unit} 히트맵`}
+            aria-label={`${unit} heatmap`}
             className="grid gap-[2px]"
             style={{
               gridTemplateColumns: `repeat(${cols}, 1fr)`,
@@ -102,7 +102,7 @@ export function Heatmap({
             >
               <span className="text-sm font-semibold tabular-nums">{values[hover.r][hover.c]}</span>{' '}
               <span className="text-[11px] text-muted-foreground">
-                {unit} · {rowLabels[hover.r]} {colLabels[hover.c] ?? `${hover.c}시`}
+                {unit} · {rowLabels[hover.r]} {colLabels[hover.c] ?? `${hover.c}:00`}
               </span>
             </div>
           )}
@@ -120,7 +120,7 @@ export function Heatmap({
       </div>
 
       <table className="sr-only">
-        <caption>{unit} 히트맵</caption>
+        <caption>{unit} heatmap</caption>
         <tbody>
           {values.map((row, r) => (
             <tr key={r}>

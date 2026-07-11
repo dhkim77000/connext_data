@@ -1,5 +1,5 @@
-// 공개 데모 셸 (마스터 플랜 4.6.4) — 인증 없음. 모든 뷰에 "샘플 데이터" 배지와
-// "내 데이터 연결하기" CTA를 상시 노출해 가상 데이터임을 분명히 한다.
+// Public demo shell (master plan 4.6.4) — no auth. Every view carries the
+// "sample data" badge and a "Connect your data" CTA so nothing reads as real.
 
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -8,8 +8,9 @@ import { DemoTabs } from '@/components/demo/demo-tabs'
 import { demoBrand } from '@/lib/demo/data'
 
 export const metadata: Metadata = {
-  title: 'Connext 데모 — 크로스플랫폼 대시보드',
-  description: 'Shopify · Instagram · Meta · GA4 데이터를 하나로 잇는 Connext를 샘플 데이터로 체험해 보세요.',
+  title: 'Connext Demo — Cross-platform dashboard',
+  description:
+    'Explore Connext with sample data: Shopify, Instagram, Meta and GA4 connected into one dashboard.',
 }
 
 export default function DemoLayout({ children }: { children: React.ReactNode }) {
@@ -22,7 +23,7 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
               Connext<span className="text-cx-accent">.</span>
             </Link>
             <span className="whitespace-nowrap rounded-full bg-cx-accent/15 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-accent-foreground dark:text-cx-accent-soft">
-              데모 · 샘플 데이터
+              Demo · sample data
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-2.5">
@@ -31,7 +32,7 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
               href="/signup"
               className="cx-press rounded-full bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground"
             >
-              내 데이터 연결하기
+              Connect your data
             </Link>
           </div>
         </div>
@@ -41,13 +42,13 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              통합 대시보드 데모
+              Unified dashboard demo
             </p>
             <h1 className="mt-1.5 text-xl font-medium tracking-tight">{demoBrand.name}</h1>
           </div>
           <div className="hidden items-center gap-2 font-mono text-[11px] text-muted-foreground sm:flex">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-pos" aria-hidden />
-            오늘 새벽 동기화됨
+            Synced this morning
           </div>
         </div>
 
@@ -57,7 +58,7 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
         <p className="mt-10 border-t border-border pt-5 text-center font-mono text-[11px] text-muted-foreground">
           {demoBrand.note}{' '}
           <Link href="/signup" className="text-foreground underline underline-offset-4 hover:text-cx-accent">
-            무료로 시작하기
+            Start free
           </Link>
         </p>
       </main>
