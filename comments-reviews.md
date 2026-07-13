@@ -1,12 +1,13 @@
-# Comments & reviews — can we pull them? (Instagram · TikTok · Shopify)
+# Comments & reviews — can we pull them? (YouTube · Instagram · TikTok · Shopify)
 
 Survey of pulling **user text** — social comments and product reviews — as a data source for
 review/CS text-mining (master plan 1.1.13 채널톡, 1.1.14 리뷰 data_type, 3.6.5 `derived_review_signals`).
-Short answer per platform: **Instagram ✅ clean · TikTok ⚠️ gated · Shopify ⚠️ lives in a review app,
-not Shopify itself.**
+Short answer per platform: **YouTube ✅ easiest (API key) · Instagram ✅ clean · TikTok ⚠️ gated ·
+Shopify ⚠️ lives in a review app, not Shopify itself.**
 
 | Source | Can we read comments/reviews? | Path | Gate |
 |---|---|---|---|
+| **YouTube** | ✅ Easiest — comments + replies on any public video | Data API v3 `commentThreads.list` | **API key**, no vetting; 10K units/day (owned channel + write → OAuth) |
 | **Instagram** | ✅ Yes — comments + replies | IG Graph API (same Meta app 2094) | `instagram_manage_comments` scope + Advanced Access app review |
 | **TikTok** | ⚠️ Hard — organic comment reading is gated | Research API (vetted only) / Business API (moderation, ad-oriented) | Research eligibility, or Business API tied to ad account |
 | **Shopify** | ⚠️ Not native — product reviews live in a 3rd-party app | Review-app API (Judge.me / Yotpo / Loox / Okendo) | Depends which app the merchant runs |
@@ -36,7 +37,28 @@ Data model (E2.2 tree): comments are **events** → `instagram_comments_history`
 
 ---
 
-## 2. TikTok — gated, no clean organic path ⚠️
+## 2. YouTube — the easy one, plus rich analytics ✅ (verified 2026-07-13)
+
+The **opposite of TikTok** — YouTube's public API is wide open. Two surfaces:
+
+- **Comments (text mining source):** `commentThreads.list` (Data API v3) reads comments + replies on
+  **any public video**. **API key** for public reads — **no vetting, no app review** (OAuth only if you
+  need owned-channel private data or write/moderation). Cost ~1–3 quota units/call against a
+  **10,000 units/day** default bucket — effectively free for our volume. (v2 API is deprecated → v3.)
+- **Channel analytics + demographics (the connector, master plan 1.1.7):** YouTube **Analytics API**
+  (OAuth, owned/managed channel) returns views, `estimatedMinutesWatched` (watch time),
+  `averageViewDuration`, `subscribersGained`, likes — **and real audience demographics: `ageGroup`,
+  `gender`, `country`** (plus device, traffic source). This is *actual* channel demographics, not the
+  estimates we'd otherwise infer — a direct upgrade to the demo's "who each channel reaches."
+  - **Limit:** demographics are **owned-channel only** — you cannot pull a *competitor's* audience
+    age/country breakdown.
+
+So YouTube gives us both: **comments** (easiest of all four platforms here) and **owned-channel
+demographics** (unique — no other channel hands us verified age/gender/country). Feeds 3.6.5 text
+mining (comments) and the demographic layer (analytics). Same 10K-units/day quota the master plan
+already flags for 1.1.7.
+
+## 3. TikTok — gated, no clean organic path ⚠️
 
 Three developer surfaces, none of which cleanly gives a brand its own organic comment stream:
 
@@ -63,7 +85,7 @@ use case. Options, worst trade-offs noted:
 
 ---
 
-## 3. Shopify — "reviews" isn't a Shopify feature ⚠️
+## 4. Shopify — "reviews" isn't a Shopify feature ⚠️
 
 - Shopify's **native Product Reviews app was discontinued (2024)** — old reviews still render, no new
   collection, deprecated. There is no product-reviews object in the Admin API.
@@ -85,14 +107,15 @@ is the review app, so the connector is "Judge.me" (etc.), keyed back to `shopify
 
 ---
 
-## 4. Where this plugs in
+## 5. Where this plugs in
 
 All three feed the same downstream: **3.6.5 리뷰·CS 텍스트 마이닝 → `derived_review_signals`** (LLM
 topic + sentiment → cards like "상품 X 배송 불만 급증"). Priority order by effort/payoff:
 
-1. **Instagram comments** — cheapest (connector exists), highest-signal for a social-led brand. **P1.**
-2. **Shopify reviews via Judge.me** — high commercial value (product-level sentiment), one app API. **P1.**
-3. **TikTok comments** — blocked by platform; revisit only if a supported path opens. **P2 / hold.**
+1. **YouTube comments** — the cheapest of all (API key, no review, 10K units/day). **P1.**
+2. **Instagram comments** — connector exists, highest-signal for a social-led brand (app review needed). **P1.**
+3. **Shopify reviews via Judge.me** — high commercial value (product-level sentiment), one app API. **P1.**
+4. **TikTok comments** — blocked by platform; revisit only if a supported path opens. **P2 / hold.**
 
 Master plan: extends 1.1.14 (review data_type) with a **source split** — IG Graph vs review-app API —
 and adds a hold note on TikTok organic comments.
@@ -101,6 +124,8 @@ and adds a hold note on TikTok organic comments.
 
 ## Sources
 
+- YouTube Data API v3 commentThreads.list (API key, quota) — https://developers.google.com/youtube/v3/docs/commentThreads/list · quota: https://developers.google.com/youtube/v3/determine_quota_cost
+- YouTube Analytics API demographics (ageGroup/gender/country, owned only) — https://developers.google.com/youtube/analytics/dimensions
 - IG comments endpoint — https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-media/comments/ · IG Comment object: https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-comment/
 - IG `instagram_manage_comments` + Advanced Access — https://developers.facebook.com/docs/instagram-platform/overview/
 - TikTok Research API video comments (vetted only) — https://developers.tiktok.com/doc/research-api-specs-query-video-comments
