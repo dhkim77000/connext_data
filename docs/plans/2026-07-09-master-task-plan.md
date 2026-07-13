@@ -86,7 +86,7 @@ Phase 1(기반 + Shopify/Meta)은 완료. 지금 제품은 "**수동 버튼을 �
 | 1.1.11 | Naver Search Ad | ⬜ 폼만 | ⬜ | ⬜ | HMAC 클라이언트 → 커넥터 + DDL | P2 |
 | 1.1.12 | Kakao Moment | ⬜ | ⬜ | ⬜ | 파트너 사전 승인 필요 — 승인 신청만 먼저 걸어두기 | P2 |
 | 1.1.13 | 채널톡 (CS) | ⬜ | ⬜ | ⬜ | Open API로 상담·고객 문의 수집 → 리뷰·CS 텍스트 마이닝(3.6.5) 원천 | P2 |
-| 1.1.14 | 리뷰 data_type 확장 | — | ⬜ | ⬜ | Cafe24·네이버·쿠팡 커넥터 구현 시 상품 리뷰 수집을 범위에 포함 (DDL은 2.3.3) | P1 |
+| 1.1.14 | 리뷰·댓글 수집 (원천 분리) | — | ⬜ | ⬜ | **IG 댓글**(Graph API, `instagram_manage_comments`, 커넥터 재사용 — 최단) + **Shopify 리뷰**(네이티브 폐지 → Judge.me 등 리뷰앱 API) + Cafe24·네이버·쿠팡 상품 리뷰. **TikTok 조직 댓글은 플랫폼 게이트로 보류**. 전부 3.6.5 텍스트 마이닝 원천. 조사: 루트 `comments-reviews.md` (2026-07-13). DDL은 2.3.3 | P1 |
 | 1.1.15 | Shopify POS (오프라인 매장) | ✅ (동일 토큰) | ⬜ | 🔶 | **별도 API 없음** — POS 판매 = 일반 주문(`source_name: pos`). 커넥터에 `source_name`+`retail_location_id` 매핑(+기존 행은 `raw`에서 백필), `locations` data_type, 온·오프 분리 대시보드. 스태프·금전등록기(CashTrackingSession, POS Pro)는 P2. 조사 문서: 루트 `shopify-pos.md` (2026-07-11) | P1 |
 | 1.1.16 | 🧭 외부 POS (Square·Toast·Clover·Lightspeed) | ⬜ | ⬜ | ⬜ | **시장 적합성 게이트 선행**: 전부 한국 미지원(Square 국내 결제 불가, Toast는 US/CA/UK/IE) → 국내 오프라인이면 국내 POS/VAN 조사로 대체, 해외 매장/글로벌 트랙이면 Square 직결부터(셀프서브). Toast는 파트너 신청 리드타임, 3개+ 동시면 POS Linker 등 미들레이어 재평가. 조사 문서: 루트 `pos-platforms.md` (2026-07-11) | P2 |
 
