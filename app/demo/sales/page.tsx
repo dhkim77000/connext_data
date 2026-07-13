@@ -2,11 +2,30 @@
 // table, and the basket-size trend.
 
 import { Label, Panel, Stat } from '@/components/dashboard/ui'
-import { StackedAreaChart } from '@/components/charts/stacked-area'
+import { RevenueLens } from '@/components/demo/revenue-lens'
 import { TrendExplorer } from '@/components/charts/trend-explorer'
 import { AnimatedNumber } from '@/components/charts/animated-number'
 import { fmtCurrency, fmtInt } from '@/lib/format'
-import { demoDays, demoSummary as s, demoProductStack, demoProductBands, demoProducts } from '@/lib/demo/data'
+import {
+  demoDays,
+  demoSummary as s,
+  demoProductStack,
+  demoProductBands,
+  demoProducts,
+  demoRevenueByChannel,
+  demoChannelBands,
+  demoRevenueByCustomer,
+  demoCustomerBands,
+  demoRevenueByRegion,
+  demoRegionBands,
+} from '@/lib/demo/data'
+
+const REVENUE_LENSES = [
+  { key: 'product', label: 'By product', bands: demoProductBands, data: demoProductStack },
+  { key: 'channel', label: 'By channel', bands: demoChannelBands, data: demoRevenueByChannel },
+  { key: 'customer', label: 'New vs returning', bands: demoCustomerBands, data: demoRevenueByCustomer },
+  { key: 'region', label: 'By region', bands: demoRegionBands, data: demoRevenueByRegion },
+]
 
 function Th({ children, right = false }: { children: React.ReactNode; right?: boolean }) {
   return (
@@ -20,19 +39,19 @@ export default function DemoSalesPage() {
   const maxProdRev = Math.max(...demoProducts.map((p) => p.revenue), 1)
   return (
     <div className="cx-stagger grid gap-3 lg:grid-cols-12">
-      {/* Revenue stacked by product — the composition IS the story */}
+      {/* Revenue, sliced any way — one total, many angles */}
       <Panel className="lg:col-span-8">
         <div className="mb-1 flex items-baseline justify-between gap-3">
-          <Label>Revenue by product · 90 days</Label>
+          <Label>Revenue breakdown · 90 days</Label>
           <p className="text-2xl font-semibold tracking-tight">
             <AnimatedNumber value={s.revenue} format="currency" />
           </p>
         </div>
         <p className="mt-1.5 mb-4 text-sm text-muted-foreground">
-          Each band is a product; the height is total daily revenue. Glow Serum swells on reel days, sunscreen
-          in the summer campaign. Click a product to isolate it.
+          The same daily revenue, sliced by product, channel, customer type, or region. Each band stacks to
+          the daily total — switch the angle, click a band to isolate it.
         </p>
-        <StackedAreaChart data={demoProductStack} bands={demoProductBands} format="currency" height={230} />
+        <RevenueLens lenses={REVENUE_LENSES} height={230} />
       </Panel>
 
       {/* KPI rail */}

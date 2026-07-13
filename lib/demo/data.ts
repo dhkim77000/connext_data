@@ -76,6 +76,7 @@ function build(): DemoDay[] {
     const cvr = 0.021 * WF_CVR[dow] * noise(0.08)
     let orders = Math.round(sessions * cvr)
     if (PROMO_DAYS.has(i)) orders = Math.round(orders * 1.45) // referral blast
+    if (i === EV_INFLUENCER) orders = Math.round(orders * 1.35) // collab code purchases
     // $75 basket keeps blended CAC (~$15) and ROAS (~3×) in realistic D2C territory
     const aov = 75 * (dow === 0 || dow === 6 ? 1.05 : 1) * noise(0.06)
     const revenue = Math.round(orders * aov)
@@ -176,6 +177,57 @@ export const demoProductStack: ProductStackRow[] = demoDays.map((d, i) => {
     other: alloc(w.other),
   }
 })
+
+// The SAME daily revenue, sliced by any dimension — powers the Sales-tab lens
+// switcher (product / channel / customer / region). One number, many angles.
+function stackByWeights(weightsFor: (i: number) => Record<string, number>) {
+  return demoDays.map((d, i) => {
+    const w = weightsFor(i)
+    const total = Object.values(w).reduce((a, b) => a + b, 0) || 1
+    const row: Record<string, number | string> = { x: d.x }
+    for (const k of Object.keys(w)) row[k] = Math.round((d.revenue * w[k]) / total)
+    return row as { x: string } & Record<string, number>
+  })
+}
+
+export const demoChannelBands = [
+  { key: 'meta', label: 'Meta ads', color: 'var(--ch-meta)' },
+  { key: 'search', label: 'Search', color: 'var(--ch-naver)' },
+  { key: 'instagram', label: 'Instagram', color: 'var(--ch-instagram)' },
+  { key: 'direct', label: 'Direct', color: 'var(--ch-youtube)' },
+  { key: 'other', label: 'Other', color: 'var(--cx-dim)' },
+] as const
+export const demoRevenueByChannel = stackByWeights((i) => {
+  const w: Record<string, number> = { meta: 0.38, search: 0.22, instagram: 0.17, direct: 0.15, other: 0.08 }
+  if (CAMPAIGN_SPIKE(i) > 1) { w.meta += 0.1; w.other = Math.max(0.02, w.other - 0.1) }
+  if (VIRAL_DAYS.has(i)) { w.instagram += 0.14; w.other = Math.max(0.02, w.other - 0.14) }
+  return w
+})
+
+export const demoCustomerBands = [
+  { key: 'returning', label: 'Returning', color: 'var(--ch-shopify)' },
+  { key: 'new', label: 'New', color: 'var(--cx-accent-soft)' },
+] as const
+export const demoRevenueByCustomer = stackByWeights((i) => {
+  // acquisition pushes (campaign) skew toward new; steady state ~63% new
+  const newShare = 0.63 + (CAMPAIGN_SPIKE(i) > 1 ? 0.07 : 0) + (VIRAL_DAYS.has(i) ? 0.05 : 0)
+  return { new: newShare, returning: 1 - newShare }
+})
+
+export const demoRegionBands = [
+  { key: 'seoul', label: 'Seoul', color: 'var(--ch-shopify)' },
+  { key: 'gyeonggi', label: 'Gyeonggi', color: 'var(--ch-meta)' },
+  { key: 'busan', label: 'Busan', color: 'var(--ch-youtube)' },
+  { key: 'incheon', label: 'Incheon', color: 'var(--ch-naver)' },
+  { key: 'other', label: 'Other', color: 'var(--cx-dim)' },
+] as const
+export const demoRevenueByRegion = stackByWeights((i) => ({
+  seoul: 0.34 * noise(0.05),
+  gyeonggi: 0.21 * noise(0.05),
+  busan: 0.09 * noise(0.06),
+  incheon: 0.07 * noise(0.06),
+  other: 0.29 * noise(0.04),
+}))
 
 export const demoProducts = [
   { title: 'Glow Serum 30ml', revenue: Math.round(revenue * 0.24), units: 5_840 },
