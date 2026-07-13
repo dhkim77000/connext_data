@@ -1,112 +1,188 @@
-# POS platforms — API survey (Toast · Square · Lightspeed · Clover · Shopify POS)
+# Offline POS integration — direct per-vendor APIs (global: US/EU + Korea)
 
-Survey of third-party POS platforms for offline/retail sales ingestion, and how they'd
-plug into connext. **Shopify POS is a special case** — it's not a separate platform for
-us (POS sales ride the Admin API we already use); see `shopify-pos.md`.
+**Goal:** collect a store's **offline sales** (transaction-level + SKU-level) by having each store
+**delegate read access** to us — not by buying data from an aggregator.
 
-**Market reality check (2026):** none of the US POS platforms below operate in Korea —
-Square's card processing is unavailable in Korea (the app installs but can't take
-payments), and Toast serves only US/CA/UK/IE. For **Korea-domestic offline retail**, the
-relevant systems are Korean POS/VAN players (토스플레이스, OKPOS, 포스뱅크, KIS/NICE 계열
-등) — separate research item. The platforms below matter for two tracks: **(a) Korean
-brands' overseas stores/popups** (US/JP/UK), **(b) a future global-market track**.
+**Model — delegation, not purchase:**
+```
+Store (owns its POS account)
+  → grants "read my sales data" on an OAuth consent screen (or issues an API key)
+Our app (registered as a developer/partner with each POS vendor)
+  → receives an access token / key, scoped to that merchant
+POS vendor API (Orders / Transactions / Line items)
+  → our pipeline
+```
+Prereq per vendor: **we register as a developer or partner**, and **the store installs/approves our app**.
+We build **direct connectors per POS** (no unified-API middleware — see §7 for why).
+
+> Companion: `shopify-pos.md` is the Shopify-POS deep-dive (POS = ordinary Shopify orders). This doc
+> is the cross-vendor survey. Reconciled with the connext warehouse in §5.
 
 ---
 
 ## 1. Per-platform summary
 
-| Platform | Access model | Data available | Auth | Webhooks | Dev docs |
-|---|---|---|---|---|---|
-| **Toast** (restaurants; US/CA/UK/IE) | ⚠️ **Gated 2-track** — see below | Orders, checks/payments, menus, stock, labor/employees, kitchen, cash entries | OAuth2 client-credentials (machine) | ✅ | doc.toasttab.com/doc/devguide · changelog: toast-api.launchnotes.io |
-| **Square** (US/CA/JP/AU/UK/IE/FR/ES) | ✅ Self-serve — most developer-friendly of the group | Orders, Payments, Catalog, Inventory, Customers, Team/Labor, Locations (reporting = derive from Orders/Payments; no dedicated Reports API in v2) | OAuth2 (multi-merchant) or access token (own account) | ✅ | developer.squareup.com |
-| **Lightspeed** (NA/EU/AU) | ✅ Self-serve dev account | Sales, inventory, customers, employees; strong multi-location model. ⚠️ **Multiple product lines with different APIs** (Retail X-Series ex-Vend, Retail R-Series, Restaurant K-Series) — confirm WHICH Lightspeed the merchant runs before scoping | OAuth2 | ✅ (varies by line) | developers.lightspeedhq.com |
-| **Clover** (US/CA + some intl) | ✅ Self-serve sandbox; App Market for distribution | Orders, payments, inventory, customers, employees | OAuth2 | ✅ | docs.clover.com |
-| **Shopify POS** | ✅ Same token as online store | Everything = normal orders (`source_name: pos`) + locations, tender, register sessions | (existing) | ✅ (same topics) | → `shopify-pos.md` |
+| POS | Region | Auth | Partner approval | SKU | History | Difficulty |
+|---|---|---|---|---|---|---|
+| **Square** | Global (US/CA/JP/AU/UK/IE/FR/ES) | OAuth 2.0 (code / PKCE) | **None** — self-serve dev dashboard | ✅ line items | ✅ | 🟢 low |
+| **Shopify POS** | Global | OAuth 2.0 (Partner app) | scope-gated | ✅ | ⚠️ 60-day default; full needs approval | 🟡 med |
+| **Clover** | US/CA (+some intl) | OAuth 2.0 | dev + App Market listing | ✅ | ✅ | 🟡 med |
+| **Lightspeed** | Global (NA/EU/AU) | OAuth 2.0 | dev account | ✅ | ✅ | 🟡 med (multi-product, see note) |
+| **Toast** | US/CA/UK/IE | Partner auth | ❗ required 3-step review | ✅ | ✅ | 🔴 high |
+| **Toss Place (토스플레이스)** | Korea | API key pair | dev-center signup | ✅ | ✅ | 🟢 low |
+| **OK/NICE/KIS Pos (전통 국내 POS)** | Korea | per-contract | individual B2B contract | — | — | 🔴 very high |
 
-### Toast access — the important correction
+### Square — the fast PoC path 🟢
+- OAuth 2.0 (code or PKCE). **No partner approval** — create an app in the developer dashboard and start.
+- **Scopes:** `ORDERS_READ` (orders + line items = SKU-level), `PAYMENTS_READ`, `MERCHANT_PROFILE_READ`,
+  `ITEMS_READ` (catalog).
+- **Endpoints:** Orders API (revenue, line items) · Payments API · Catalog API · Merchants/Locations API.
+- **Tokens (verified):** access token **expires in 30 days**. Refresh differs by flow —
+  **code flow: the refresh token doesn't rotate and stays valid until revoked**; **PKCE flow: single-use,
+  rotates, 90-day expiry.** Square recommends renewing **every ≤7 days** regardless of activity → a
+  scheduled refresh job is mandatory (ties to master plan 1.3.x token lifecycle).
+- **Offline caveat:** offline-mode payments sync after reconnect → **transaction time ≠ time it's
+  queryable via API**; polling by `created_at` alone drops rows (see §5.2).
 
-Toast API docs are open to read, but credentials are **not** open self-serve for a SaaS:
+### Shopify POS 🟡
+- POS sales = ordinary Shopify orders (`source_name: pos`), same Admin API. See `shopify-pos.md`.
+- **`read_orders` returns only the last 60 days.** Full history needs **`read_all_orders`**, which is a
+  **separate Shopify review** (Partner Dashboard → API access → request, justify the use case). File
+  early if backfill matters.
 
-1. **Standard API access** — a *restaurant itself* (Toast RMS Essentials+ subscription, with
-   Manage Integrations permission) can create client credentials for **its own locations**
-   in Toast Web (Integrations → Toast API access → Manage credentials). Read-oriented,
-   per-merchant — equivalent to our "키 공유" access model (like a Shopify custom app).
-2. **Integration Partner program** — multi-merchant apps must apply via the Integration
-   Partner Application, get approved, and be added by restaurants from Toast's partner
-   marketplace. Equivalent to our "파트너 승인" model (like Kakao Moment) — **lead time
-   applies; if we ever target Toast merchants, file the application early** (same rule as
-   master plan §6 외부 승인 리드타임).
+### Toast — highest barrier 🔴
+- **Partner review required** (as in `pos-platforms` earlier): (1) accept API License Agreement,
+  (2) access docs, (3) submit the Integration Partner application, (4) await Toast review.
+- **Partners API** lists the restaurants that have added our integration (a store adds us from Toast
+  Web "Browse & purchase integrations"; needs their `Account Admin > Manage Integrations`).
+- Orders API (bulk, custom-reporting use case) · Menus API · Restaurants API. **File the application
+  first — approval lead time is the schedule risk.**
 
-So: "Toast is easy to integrate" is true *per restaurant* (merchant-issued credentials),
-but a productized connector needs the partner track.
+### Clover / Lightspeed 🟡
+- Clover: OAuth 2.0, store installs from the Clover App Market. More open than Toast, more steps than Square.
+- Lightspeed: OAuth 2.0, dev account. ⚠️ **product lines have different APIs** (Retail X-Series ex-Vend,
+  Retail R-Series, Restaurant K-Series) — confirm which the merchant runs before scoping.
+
+### Toss Place (토스플레이스) — the Korea path 🟢 (verified)
+- **A real developer Open API exists** (`docs.tossplace.com`): **server-to-server data sync + external
+  system integration**, **API key pair issued from the developer center** (key-based, not OAuth),
+  **webhook event registration** for real-time store events. Explicitly supports ERP/CRM integration.
+- Provides orders / payments / product (SKU + category) / store info in real time.
+- **⚠️ Open item:** the docs center on a merchant integrating **its own** Toss POS. Whether one
+  registered app can read **many** merchants' data under delegated consent (the multi-tenant model we
+  need) is **not confirmed from docs** — verify with Toss during dev-center signup before committing.
+
+### Traditional Korean POS (OK/NICE/KIS 등) 🔴
+- **No standardized public API.** Proprietary terminals + private DBs, per-vendor custom APIs, no
+  developer portal or OAuth. Access only via individual B2B contracts and custom integration.
+- Practical options: direct B2B contract + custom work · a domestic data-integration broker
+  (e.g. datapuree.io) as a bridge · manual CSV export if store count is small. **Separate track** —
+  do not block the global build on it.
 
 ---
 
-## 2. Unified middleware — buy vs build
+## 2. Recommended execution order
 
-**POS Linker** (pos-linker.com) — white-label aggregator unifying **Toast, Clover, Square,
-Heartland** behind one API: hosted OAuth, real-time sync, normalized data model, webhooks,
-Stripe-billed. Fits as a middle layer if/when we want several US POS platforms at once
-without four connector builds.
-
-Diligence before adopting (unresolved):
-- **Vendor risk** — niche product; check company maturity, SLA, data residency.
-- **Pricing** vs building 1–2 connectors ourselves (Square alone is a small build).
-- **Normalization fit** — their normalized model vs our v2 warehouse semantics
-  (snapshot/`_history`/`_stat`); we'd still write one connext connector against THEIR API.
-- **Coverage gap** — no Lightspeed; Toast still requires the partner relationship
-  somewhere in the chain.
-- Alternatives to compare: **Apideck POS API** (unified-API vendor with a POS category);
-  Omnivore (the old restaurant-POS aggregator) was acquired by Olo in 2022 and is no
-  longer the open option it was.
-
-**Recommendation (current stance):** if the need is exactly one platform (most likely
-Square for overseas popups), integrate **direct** — self-serve OAuth, excellent docs, no
-middleware dependency. Revisit POS Linker only when 3+ US POS platforms are on the
-roadmap at once.
+1. **Survey the target stores' POS mix first.** Without knowing which POS how many stores use, priority
+   is guesswork (also the top risk in §6).
+2. **File the Toast partner application immediately** (longest approval).
+3. **Request Shopify `read_all_orders`** (review needed for historical backfill).
+4. **Build the PoC on Square** — no approval, fastest path to prove OAuth → Orders API → SKU-level end
+   to end. Lock the normalization contract here.
+5. Extend to the other POS with an **adapter pattern** against the Square-validated schema.
+6. **Korea:** start with Toss Place; put traditional POS on a separate track.
 
 ---
 
-## 3. Mapping onto the connext stack
+## 3. Common fields across vendors (the adapter maps to these)
 
-The generic pipeline suggested in research
-(`POS API → middleware → Airflow → ClickHouse/Snowflake → Looker/Metabase`) maps onto what
-this repo already has/plans — we don't add Airflow/Snowflake/Looker:
+| Concept | Square | Shopify | Toast | Toss Place |
+|---|---|---|---|---|
+| Transaction id | `order.id` | `order.id` | `order.guid` | order id |
+| Store id | `location_id` | `location_id` | `restaurantGuid` | store id |
+| Line items | `line_items[]` | `line_items[]` | `selections[]` | items[] |
+| Product id | `catalog_object_id` | `variant_id` | `item.guid` | product id |
+| Quantity | `quantity` | `quantity` | `quantity` | quantity |
+| Amount | `total_money` | `total_price` | `amount` | amount |
+| Timestamp | `created_at` | `created_at` | `openedDate` | order time |
 
-| Generic layer | connext equivalent |
+---
+
+## 4. Common engineering issues
+
+- **Token management (biggest):** Square access token 30-day, renew ≤7 days on a background job; on
+  401/403 flip the connection to `reauth_needed` (1.3.2) and prompt re-consent. Tokens are per-merchant.
+- **Offline-payment delay:** transaction time ≠ queryable time → don't watermark on `created_at` alone;
+  re-poll a trailing window by `updated_at` (exactly the incremental-watermark rule in 1.2.3).
+- **Historical backfill:** chunk + resume under rate limits, as a separate job (1.2.4). Shopify needs
+  `read_all_orders` first.
+- **Webhook + reconciliation:** Square/Shopify/Toss Place support webhooks; pair with periodic polling
+  to catch missed deliveries (webhook intake = 1.2.8).
+- **Per-merchant rate-limit lanes:** limits vary and become the bottleneck as store count grows →
+  per-merchant queues/throttle (1.2.6). Korean lanes stay slow (2 RPS convention).
+
+---
+
+## 5. Data model — reconcile with the connext warehouse
+
+The research proposes a POS-agnostic normalized schema (`pos_transaction`, `pos_line_item`,
+`pos_product`, `pos_merchant`, `pos_location`, `pos_connection`). Map it onto what connext already does:
+
+- **Ingest raw per-vendor, following the existing convention** (`<source>_<entity>` — E2.2 decision
+  tree): `square_orders_history`, `square_order_line_items_history` (events → `_history`),
+  `square_products` / `square_locations` (snapshots). Same for `toast_*`, `clover_*`, `tossplace_*`.
+  This keeps the vendor's raw shape (audit, reprocessing) and matches every other connector.
+- **Normalize at the analytics layer, not at ingest.** The unified `pos_transaction` / `pos_line_item`
+  view is exactly **`unified_orders`** already planned in 3.1.1 — extend it to carry a `channel`
+  = online/in-store split and a `pos_vendor` column. The adapter/normalization lives in the view, so a
+  new POS = a new raw table + a `UNION` branch, not a rewrite.
+- **`pos_connection` is not a warehouse table** — it's connection/credential state, i.e. the existing
+  Supabase `channel_connections` + `channel_credentials` (per-merchant token, expiry). No new store
+  needed; POS connections are just more `channel_connections` rows.
+- New DDL still passes E2.2 and lands in the v2 spec only (2.3.1/2.3.2 already reserve TikTok/YouTube/
+  Naver/Coupang DDL; add the POS vendors there).
+
+Net: **no bespoke `pos_*` schema at ingest** — raw `<vendor>_*` tables + a `unified_orders` view is the
+connext-consistent shape and avoids double-normalizing.
+
+---
+
+## 6. Risks
+
+| Risk | Mitigation |
 |---|---|
-| POS API / POS Linker | `lib/connectors/<platform>` (or one connector against POS Linker) |
-| Airflow | Sync orchestration — master plan **1.2.1/1.2.2** (Vercel Cron vs Workflow DevKit vs BullMQ, 결정 대기) + retries 1.2.5 |
-| Snowflake / ClickHouse | **ClickHouse** (fixed) — new tables via the **E2.2 decision tree** (e.g. `square_orders_history`, `square_payments_history`, `square_catalog` snapshot) |
-| Looker / Metabase | connext dashboards (`components/charts` kit) — offline/online split, per-location views |
-
-Integration blueprint per platform = the standard 3박자 (E1.1): 자격증명(OAuth) → fetch
-커넥터(orders/payments/catalog/locations) → v2 DDL. Webhooks slot into 1.2.8.
+| Partner-approval lead time (Toast, Shopify `read_all_orders`) | File at project start (§2) |
+| POS fragmentation (connector count grows linearly) | Survey the store POS mix first |
+| Korea coverage (only Toss Place has a real API) | Toss Place first; traditional POS a separate track |
+| Store churn (merchant revokes access anytime) | Connection-health monitoring (1.3.2) + re-consent flow |
+| Data consistency (tax/discount/refund modeled differently per POS) | Per-vendor adapter into the unified view (§5) |
 
 ---
 
-## 4. Decision gate before any build
+## 7. Why direct, not a unified-API vendor
 
-1. **Which market are we serving offline?** Korea-domestic → this doc's platforms don't
-   apply; run the Korean POS/VAN survey instead. Overseas stores of KR brands → **Square
-   first** (self-serve, JP+US coverage matches K-brand popup patterns).
-2. If Toast merchants matter → file the Integration Partner application first (lead time),
-   build later.
-3. Only at 3+ platforms simultaneously → re-evaluate POS Linker/Apideck as middleware.
+The direct-delegation model (this doc) is the chosen approach. Unified middleware (POS Linker,
+Apideck) was evaluated and **rejected for now**: niche-vendor risk, cost vs a 1–2 connector build,
+their normalized model still needs a connext connector on top, gaps (POS Linker has no Lightspeed; none
+cover Toss Place / Korea). Revisit only if 3+ US POS platforms land on the roadmap simultaneously.
 
-Master plan: task **1.1.16** (P2 · 🧭 market-fit gate).
+---
+
+## 8. Open items (verify before build)
+
+- **Toss Place multi-merchant delegation** — can one app read many stores' data under delegated
+  consent, or is it per-merchant key issuance? (docs are first-party-focused) — confirm at dev-center signup.
+- Each vendor's **exact rate limits** (often undocumented until partner-registered).
+- **Toast partner-approval actual lead time.**
+- The **real POS distribution of target stores** — decides connector priority.
 
 ---
 
 ## Sources
 
-- POS Linker — https://pos-linker.com/
-- Toast standard API access requirements — https://doc.toasttab.com/doc/devguide/devApiAccessRequirements.html · credentials: https://doc.toasttab.com/doc/devguide/devApiAccessCredentials.html
-- Toast partner application — https://support.toasttab.com/en/article/Customer-Requesting-API-Credentials · auth: https://doc.toasttab.com/doc/devguide/authentication.html
-- Square developer docs — https://developer.squareup.com · international availability: https://developer.squareup.com/docs/international-development · Korea (no card processing): https://community.squareup.com/t5/Using-Square/Is-square-pos-system-available-in-Korea/td-p/227170
-- Square countries (Wikipedia summary) — https://en.wikipedia.org/wiki/Square_(financial_services)
-- Toast markets (US/CA/UK/IE; ~106k locations) — https://www.paymentsdive.com/news/lightspeed-ceo-jp-chauvet-toast-restaurant-pos-payments-european-market/699708/
-- Lightspeed developers — https://developers.lightspeedhq.com
-- Clover developers — https://docs.clover.com · payments integration options: https://docs.clover.com/dev/docs/paas-integration-options
-- Apideck POS API — https://developers.apideck.com/apis/pos/reference
-- Shopify POS — repo `shopify-pos.md`
+- Square OAuth tokens (30-day access; code vs PKCE refresh; renew ≤7d) — https://developer.squareup.com/docs/oauth-api/refresh-revoke-limit-scope · best practices: https://developer.squareup.com/docs/oauth-api/best-practices
+- Square Orders/Catalog/Locations — https://developer.squareup.com/docs/orders-api/what-it-does
+- Shopify `read_all_orders` (60-day default, approval) — https://shopify.dev/docs/api/usage/access-scopes ; POS: repo `shopify-pos.md`
+- Toast partner access — https://doc.toasttab.com/doc/devguide/devApiAccessRequirements.html · https://doc.toasttab.com/doc/devguide/apiPartnersGettingAccessibleRestaurants.html
+- Clover — https://docs.clover.com · Lightspeed — https://developers.lightspeedhq.com
+- Toss Place Open API — https://docs.tossplace.com/reference/open-api/intro.html · getting started: https://docs.tossplace.com/guide/pos-integration/getting-started.html

@@ -145,7 +145,8 @@ worth including a small "online vs in-store today" split when 1.2.8 lands.
 
 | Need | Scope / requirement |
 |---|---|
-| POS orders (read) | `read_orders` (already have) + Protected Customer Data approval (already tracked) |
+| POS orders (read) | `read_orders` (already have) + Protected Customer Data approval (already tracked). **⚠️ `read_orders` returns only the last 60 days** |
+| POS orders — full history | **`read_all_orders`** — a **separate Shopify review** (Partner Dashboard → API access → request, justify the use case). Required for historical backfill; file early (lead time) |
 | Locations | `read_locations` (add at next OAuth scope bump) |
 | Staff names | `read_users` (+ Plus caveats, §4) |
 | Cash tracking sessions | POS Pro location + scope TBD (§5) |
