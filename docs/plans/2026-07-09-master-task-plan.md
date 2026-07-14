@@ -75,7 +75,7 @@ Phase 1(기반 + Shopify/Meta)은 완료. 지금 제품은 "**수동 버튼을 �
 | ID | 플랫폼 | 자격증명 | fetch 커넥터 | DDL(v2) | 상태 → 다음 액션 | 우선 |
 |---|---|---|---|---|---|---|
 | 1.1.1 | Shopify (핵심 5종) | ✅ | ✅ | ✅ | ✅ orders(어트리뷰션 필드 포함 2026-07-13)·line_items·products·variants·customers | — |
-| 1.1.1a | Shopify — 레퍼럴·마케팅·수익성 dataType | ✅ | ⬜ | ✅ | 스키마는 준비됐으나 fetch 미구현 **14종**. **레퍼럴/마케팅:** `discount_codes`·`price_rules`(쿠폰/레퍼럴 코드)·`marketing_events`(UTM 캠페인)·`abandoned_checkouts`. **수익성:** `transactions`·`refunds`·`payouts`·`disputes`·`returns`. **운영:** `fulfillments`·`inventory_levels`·`locations`·`collections`·`shop`. 각 fetch+매핑. GraphQL의 `Order.customerJourneySummary`(마케팅 어트리뷰션)도 검토 | P1 |
+| 1.1.1a | Shopify — 레퍼럴·마케팅·수익성 dataType | ✅ | 🔶 | ✅ | **레퍼럴/마케팅 4종 구현 완료(2026-07-13):** `price_rules`·`discount_codes`(팬아웃)·`marketing_events`(UTM)·`abandoned_checkouts` — 커넥터+계약테스트+`/data` 뷰어 배선. **남음:** 수익성 `transactions`·`refunds`·`payouts`·`disputes`·`returns` + 운영 `fulfillments`·`inventory_levels`·`locations`·`collections`·`shop`. GraphQL `Order.customerJourneySummary`도 검토 | P1 |
 | 1.1.2 | Meta Ads | ✅ | ✅ | ✅ | ✅ 완료 (토큰 갱신은 1.3.1) | — |
 | 1.1.3 | Instagram organic | ✅ | ⬜ 스텁 | ✅ | **TS fetch 구현** — Python `pipeline/connext_pipeline/`의 검증된 호출 패턴 포팅 (media, account insights). `CLAUDE.md` 레이트리밋 수칙 준수 | P0 |
 | 1.1.4 | GA4 | 🔶 OAuth만 | ⬜ | ✅ (`ga4_daily_stat`) | Data API `runReport` 커넥터 + 토큰버킷(200k/day) | P1 |
