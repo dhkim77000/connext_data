@@ -27,6 +27,72 @@ describe('shopifyConnector', () => {
     expect(shopifyConnector.authType).toBe('oauth2')
   })
 
+  const hdr = { get: () => null, has: () => false }
+
+  it('maps referral/marketing dataTypes to their v2 tables', () => {
+    expect(shopifyConnector.targetTable('price_rules')).toBe('shopify_price_rules')
+    expect(shopifyConnector.targetTable('discount_codes')).toBe('shopify_discount_codes')
+    expect(shopifyConnector.targetTable('marketing_events')).toBe('shopify_marketing_events')
+    expect(shopifyConnector.targetTable('abandoned_checkouts')).toBe('shopify_abandoned_checkouts_history')
+  })
+
+  it('fetches marketing_events with utm fields', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true, headers: hdr,
+      json: async () => ({ marketing_events: [{ id: 55, event_type: 'ad', marketing_channel: 'social', paid: true, budget: '500.00', currency: 'USD', utm_campaign: 'summer', utm_source: 'instagram', utm_medium: 'cpc', started_at: '2024-06-01T00:00:00Z' }] }),
+    })
+    const { rows } = await shopifyConnector.fetch({ ...baseJob, dataType: 'marketing_events' })
+    const r = rows[0]
+    expect(r.marketing_event_id).toBe('55')
+    expect(r.marketing_channel).toBe('social')
+    expect(r.paid).toBe(1)
+    expect(r.budget).toBe(500)
+    expect(r.utm_campaign).toBe('summer')
+    expect(r.utm_source).toBe('instagram')
+    expect(r.utm_medium).toBe('cpc')
+  })
+
+  it('fetches price_rules', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true, headers: hdr,
+      json: async () => ({ price_rules: [{ id: 10, title: 'SUMMER', value_type: 'percentage', value: '-20.0', usage_limit: 1000, once_per_customer: true, starts_at: '2024-06-01T00:00:00Z', created_at: '2024-05-01T00:00:00Z', updated_at: '2024-06-01T00:00:00Z' }] }),
+    })
+    const { rows } = await shopifyConnector.fetch({ ...baseJob, dataType: 'price_rules' })
+    const r = rows[0]
+    expect(r.price_rule_id).toBe('10')
+    expect(r.title).toBe('SUMMER')
+    expect(r.value_type).toBe('percentage')
+    expect(r.value).toBe(-20)
+    expect(r.usage_limit).toBe(1000)
+    expect(r.once_per_customer).toBe(1)
+  })
+
+  it('fetches discount_codes via price-rule fan-out', async () => {
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, headers: hdr, json: async () => ({ price_rules: [{ id: 10 }] }) })
+      .mockResolvedValueOnce({ ok: true, headers: hdr, json: async () => ({ discount_codes: [{ id: 100, price_rule_id: 10, code: 'SUMMER20', usage_count: 412, created_at: '2024-06-01T00:00:00Z', updated_at: '2024-06-02T00:00:00Z' }] }) })
+    const { rows } = await shopifyConnector.fetch({ ...baseJob, dataType: 'discount_codes' })
+    const r = rows[0]
+    expect(r.discount_code_id).toBe('100')
+    expect(r.price_rule_id).toBe('10')
+    expect(r.code).toBe('SUMMER20')
+    expect(r.usage_count).toBe(412)
+  })
+
+  it('fetches abandoned_checkouts', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true, headers: hdr,
+      json: async () => ({ checkouts: [{ id: 77, token: 'abc', email: 'c@x.com', customer: { id: 5 }, currency: 'USD', subtotal_price: '80.00', total_tax: '8.00', total_price: '88.00', line_items: [{ id: 1 }, { id: 2 }], abandoned_checkout_url: 'https://recover', created_at: '2024-06-01T00:00:00Z', updated_at: '2024-06-01T00:00:00Z' }] }),
+    })
+    const { rows } = await shopifyConnector.fetch({ ...baseJob, dataType: 'abandoned_checkouts' })
+    const r = rows[0]
+    expect(r.checkout_id).toBe('77')
+    expect(r.recovery_url).toBe('https://recover')
+    expect(r.total_price).toBe(88)
+    expect(r.line_items_count).toBe(2)
+    expect(r.customer_id).toBe('5')
+  })
+
   it('maps orders to shopify_orders_history table', () => {
     expect(shopifyConnector.targetTable('orders')).toBe('shopify_orders_history')
   })

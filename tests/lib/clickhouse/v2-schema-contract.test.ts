@@ -22,7 +22,10 @@ const V2_TABLES = v2TableNames()
 const CONNECTOR_CONTRACTS: Array<{ connector: Connector; dataTypes: string[] }> = [
   {
     connector: shopifyConnector,
-    dataTypes: ['orders', 'order_line_items', 'products', 'product_variants', 'customers'],
+    dataTypes: [
+      'orders', 'order_line_items', 'products', 'product_variants', 'customers',
+      'price_rules', 'discount_codes', 'marketing_events', 'abandoned_checkouts',
+    ],
   },
   { connector: metaAdsConnector, dataTypes: ['campaigns', 'insights'] },
   { connector: instagramConnector, dataTypes: ['media', 'account_insights'] },

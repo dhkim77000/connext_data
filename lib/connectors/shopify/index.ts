@@ -25,6 +25,23 @@ function customersUrl(shopUrl: string, cursor?: string): string {
   return `https://${shopUrl}/admin/api/${SHOPIFY_API_VERSION}/customers.json?${params}`
 }
 
+function simpleUrl(shopUrl: string, resource: string, cursor?: string): string {
+  const params = new URLSearchParams({ limit: '250' })
+  if (cursor) params.set('page_info', cursor)
+  return `https://${shopUrl}/admin/api/${SHOPIFY_API_VERSION}/${resource}.json?${params}`
+}
+
+function checkoutsUrl(shopUrl: string, since: Date, until: Date, cursor?: string): string {
+  const params = new URLSearchParams({ limit: '250' })
+  if (cursor) {
+    params.set('page_info', cursor)
+  } else {
+    params.set('created_at_min', since.toISOString())
+    params.set('created_at_max', until.toISOString())
+  }
+  return `https://${shopUrl}/admin/api/${SHOPIFY_API_VERSION}/checkouts.json?${params}`
+}
+
 function extractNextCursor(headers: { has(h: string): boolean; get(h: string): string | null }): string | undefined {
   if (!headers.has('Link')) return undefined
   const link = headers.get('Link') ?? ''
@@ -57,6 +74,10 @@ export const shopifyConnector: Connector = {
       products: 'shopify_products',                            // current-state snapshot
       product_variants: 'shopify_product_variants',            // snapshot
       customers: 'shopify_customers',                          // snapshot
+      price_rules: 'shopify_price_rules',                      // coupon/referral code definitions
+      discount_codes: 'shopify_discount_codes',                // codes under each price rule
+      marketing_events: 'shopify_marketing_events',            // UTM campaigns (attribution)
+      abandoned_checkouts: 'shopify_abandoned_checkouts_history', // event stream (cart recovery)
     }
     const table = map[dataType]
     if (!table) throw new Error(`Shopify connector: no target table for dataType "${dataType}"`)
@@ -234,6 +255,123 @@ export const shopifyConnector: Connector = {
         }))
       })
       return { rows, nextCursor }
+    }
+
+    // Coupon/referral code definitions (value, usage limit, window).
+    if (job.dataType === 'price_rules') {
+      const { body, nextCursor } = await shopifyFetch(simpleUrl(shopUrl, 'price_rules', job.cursor), job.credentials.accessToken)
+      const rules = (body.price_rules as Record<string, unknown>[]) ?? []
+      return {
+        rows: rules.map((pr) => ({
+          tenant_id: job.tenantId,
+          connection_id: job.connectionId,
+          raw: JSON.stringify(pr),
+          price_rule_id: String(pr.id),
+          title: pr.title ?? '',
+          target_type: pr.target_type ?? '',
+          target_selection: pr.target_selection ?? '',
+          allocation_method: pr.allocation_method ?? '',
+          value_type: pr.value_type ?? '',
+          value: Number(pr.value ?? 0),                // negative for discounts
+          once_per_customer: pr.once_per_customer ? 1 : 0,
+          usage_limit: Number(pr.usage_limit ?? 0),
+          customer_selection: pr.customer_selection ?? '',
+          starts_at: pr.starts_at ?? undefined,
+          ends_at: pr.ends_at ?? undefined,
+          created_at: pr.created_at,
+          updated_at: pr.updated_at,
+        })),
+        nextCursor,
+      }
+    }
+
+    // Discount codes live UNDER price rules — fan out over a page of rules and
+    // flatten their codes. Cursor advances the price_rules pages.
+    if (job.dataType === 'discount_codes') {
+      const { body, nextCursor } = await shopifyFetch(simpleUrl(shopUrl, 'price_rules', job.cursor), job.credentials.accessToken)
+      const rules = (body.price_rules as Record<string, unknown>[]) ?? []
+      const rows: Record<string, unknown>[] = []
+      for (const rule of rules) {
+        // Drain every code for this rule — bulk-generated rules can exceed one page.
+        let dcCursor: string | undefined
+        do {
+          const params = new URLSearchParams({ limit: '250' })
+          if (dcCursor) params.set('page_info', dcCursor)
+          const url = `https://${shopUrl}/admin/api/${SHOPIFY_API_VERSION}/price_rules/${rule.id}/discount_codes.json?${params}`
+          const { body: dc, nextCursor: dcNext } = await shopifyFetch(url, job.credentials.accessToken)
+          const codes = (dc.discount_codes as Record<string, unknown>[]) ?? []
+          for (const c of codes) {
+            rows.push({
+              tenant_id: job.tenantId,
+              connection_id: job.connectionId,
+              raw: JSON.stringify(c),
+              discount_code_id: String(c.id),
+              price_rule_id: String(c.price_rule_id ?? rule.id),
+              code: c.code ?? '',
+              usage_count: Number(c.usage_count ?? 0),
+              created_at: c.created_at,
+              updated_at: c.updated_at,
+            })
+          }
+          dcCursor = dcNext
+        } while (dcCursor)
+      }
+      return { rows, nextCursor }
+    }
+
+    // Marketing events — UTM campaigns / activities (attribution source).
+    if (job.dataType === 'marketing_events') {
+      const { body, nextCursor } = await shopifyFetch(simpleUrl(shopUrl, 'marketing_events', job.cursor), job.credentials.accessToken)
+      const events = (body.marketing_events as Record<string, unknown>[]) ?? []
+      return {
+        rows: events.map((e) => ({
+          tenant_id: job.tenantId,
+          connection_id: job.connectionId,
+          raw: JSON.stringify(e),
+          marketing_event_id: String(e.id),
+          event_type: e.event_type ?? '',
+          marketing_channel: e.marketing_channel ?? '',
+          paid: e.paid ? 1 : 0,
+          budget: Number(e.budget ?? 0),
+          currency: e.currency ?? '',
+          utm_campaign: e.utm_campaign ?? '',
+          utm_source: e.utm_source ?? '',
+          utm_medium: e.utm_medium ?? '',
+          started_at: e.started_at ?? undefined,
+          ended_at: e.ended_at ?? undefined,
+        })),
+        nextCursor,
+      }
+    }
+
+    // Abandoned checkouts — carts that never converted (recovery value).
+    if (job.dataType === 'abandoned_checkouts') {
+      const { body, nextCursor } = await shopifyFetch(checkoutsUrl(shopUrl, job.since, job.until, job.cursor), job.credentials.accessToken)
+      const checkouts = (body.checkouts as Record<string, unknown>[]) ?? []
+      return {
+        rows: checkouts.map((co) => {
+          const items = (co.line_items as unknown[] | null) ?? []
+          return {
+            tenant_id: job.tenantId,
+            connection_id: job.connectionId,
+            raw: JSON.stringify(co),
+            checkout_id: String(co.id),
+            token: co.token ?? '',
+            email: co.email ?? '',
+            customer_id: String((co.customer as Record<string, unknown> | null)?.id ?? ''),
+            currency: co.currency ?? '',
+            subtotal_price: Number(co.subtotal_price ?? 0),
+            total_tax: Number(co.total_tax ?? 0),
+            total_price: Number(co.total_price ?? 0),
+            line_items_count: items.length,
+            recovery_url: co.abandoned_checkout_url ?? '',
+            completed_at: co.completed_at ?? undefined,
+            created_at: co.created_at,
+            updated_at: co.updated_at,
+          }
+        }),
+        nextCursor,
+      }
     }
 
     throw new Error(`Shopify connector: unsupported dataType "${job.dataType}"`)
