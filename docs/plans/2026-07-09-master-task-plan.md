@@ -3,6 +3,7 @@
 **작성:** 2026-07-09 · **성격:** living document — 상태 마커를 직접 갱신하며 사용
 **갱신:** 2026-07-09 v1.1 — 기능 확장 검토 반영: 수익성 레이어(E3.7)·자체 수집(E1.5)·웹훅/외부변수(1.2.8~9)·리뷰 원천(1.1.13~14)·데모 모드(4.6.4) 추가, M2.5 신설. 보류 항목은 §6 참조
 **갱신:** 2026-07-09 v1.2 — 확장 사고 반영: **데이터 연결 플레이 카탈로그(E3.8, 22개 플레이)** + 근본원인 자동 분해·전후 비교 실험(3.6.6~7) + "왜?" 드릴 UX(4.6.5) + 연결 매트릭스 상설 리뷰(§5 규칙 7)
+**갱신:** 2026-07-13 v1.3 — 조사 반영: 오프라인 POS 위임 연동(1.1.16 재정의·`pos-platforms.md`)·Shopify POS(1.1.15·`shopify-pos.md`)·**리뷰/댓글 수집 에픽(E1.6 신설, TikTok 제외 — `comments-reviews.md`)**·YouTube 실측 demographics(1.1.7). 데모 6탭 재구성(4.6.4)·차트 키트(4.4.1) 완료
 **현황 근거:** 리포 전수 스캔 (2026-07-09) + `.superpowers/sdd/progress.md` (Phase 1 12/12 완료)
 
 > **이 문서의 역할:** 제품 전체를 4대 핵심 기능(필러) 기준으로 에픽 → 태스크까지 계층 분해한 최상위 플랜.
@@ -79,14 +80,14 @@ Phase 1(기반 + Shopify/Meta)은 완료. 지금 제품은 "**수동 버튼을 �
 | 1.1.4 | GA4 | 🔶 OAuth만 | ⬜ | ✅ (`ga4_daily_stat`) | Data API `runReport` 커넥터 + 토큰버킷(200k/day) | P1 |
 | 1.1.5 | Cafe24 | 🔶 OAuth만 | ⬜ | ✅ (4종) | 커넥터 구현 (orders/items/products/customers), KST→UTC, 2 req/s 준수 | P1 |
 | 1.1.6 | Google Ads | 🔶 OAuth만 | ⬜ | ⬜ | GAQL 커넥터 + DDL. 개발자 토큰 Basic access 신청 선행 | P2 |
-| 1.1.7 | YouTube | 🔶 OAuth만 | ⬜ | ⬜ | Analytics v2 커넥터 + DDL (10k units/day 쿼터) | P2 |
+| 1.1.7 | YouTube | 🔶 OAuth만 | ⬜ | ⬜ | Analytics v2 커넥터 + DDL (10k units/day 쿼터). **Analytics API가 소유 채널 실측 demographics(연령·성별·국가) 제공 → E3.3 인리치 우선 원천**. 댓글은 1.6.1 | P2 |
 | 1.1.8 | TikTok Ads | 🔶 OAuth만 | ⬜ | ⬜ | Marketing API 커넥터 + DDL | P2 |
 | 1.1.9 | Naver Commerce | ⬜ | ⬜ | ⬜ | client_credentials+bcrypt 서명 자격증명 → 커넥터 + DDL (2 RPS) | P2 |
 | 1.1.10 | Coupang | ⬜ 폼만 | ⬜ | ⬜ | HMAC 서명 클라이언트 → 커넥터 + DDL | P2 |
 | 1.1.11 | Naver Search Ad | ⬜ 폼만 | ⬜ | ⬜ | HMAC 클라이언트 → 커넥터 + DDL | P2 |
 | 1.1.12 | Kakao Moment | ⬜ | ⬜ | ⬜ | 파트너 사전 승인 필요 — 승인 신청만 먼저 걸어두기 | P2 |
 | 1.1.13 | 채널톡 (CS) | ⬜ | ⬜ | ⬜ | Open API로 상담·고객 문의 수집 → 리뷰·CS 텍스트 마이닝(3.6.5) 원천 | P2 |
-| 1.1.14 | 리뷰·댓글 수집 (원천 분리) | — | ⬜ | ⬜ | **IG 댓글**(Graph API, `instagram_manage_comments`, 커넥터 재사용 — 최단) + **Shopify 리뷰**(네이티브 폐지 → Judge.me 등 리뷰앱 API) + Cafe24·네이버·쿠팡 상품 리뷰. **TikTok 조직 댓글은 플랫폼 게이트로 보류**. 전부 3.6.5 텍스트 마이닝 원천. 조사: 루트 `comments-reviews.md` (2026-07-13). DDL은 2.3.3 | P1 |
+| 1.1.14 | 리뷰·댓글 수집 | — | ⬜ | ⬜ | → **E1.6로 분해**(YouTube·IG·Shopify 리뷰앱, TikTok 제외) + Cafe24·네이버·쿠팡 상품 리뷰는 각 커넥터에 포함. 조사: 루트 `comments-reviews.md` | P1 |
 | 1.1.15 | Shopify POS (오프라인 매장) | ✅ (동일 토큰) | ⬜ | 🔶 | **별도 API 없음** — POS 판매 = 일반 주문(`source_name: pos`). 커넥터에 `source_name`+`retail_location_id` 매핑(+기존 행은 `raw`에서 백필), `locations` data_type, 온·오프 분리 대시보드. 스태프·금전등록기(CashTrackingSession, POS Pro)는 P2. 조사 문서: 루트 `shopify-pos.md` (2026-07-11) | P1 |
 | 1.1.16 | 오프라인 POS — 매장 위임 직결 (글로벌) | ⬜ | ⬜ | ⬜ | **모델: 매장이 읽기 권한 위임**(구매 아님) — POS사별 개발자/파트너 등록 + 매장 앱 설치. **실행 순서:** ① 대상 매장 POS 분포 조사 → ② Toast 파트너·Shopify `read_all_orders` 심사 **즉시 신청**(리드타임) → ③ **Square로 PoC**(승인 불필요, OAuth→Orders→SKU 최단) → ④ 어댑터 패턴 확장. **한국: 토스플레이스**(개발자센터 API 키페어·웹훅·서버투서버 실재 확인, 단 멀티머천트 위임 미확정) 우선, 전통 POS(OK/NICE/KIS)는 표준 API 없음 → 별도 트랙(B2B 계약/datapuree). 정규화는 이중정규화 금지 — 벤더 raw `<vendor>_*` 적재 + `unified_orders`(3.1.1) 뷰에서 통합·온오프 split. 조사: 루트 `pos-platforms.md` (2026-07-13 종합) | P2 |
 
@@ -132,6 +133,23 @@ Phase 1(기반 + Shopify/Meta)은 완료. 지금 제품은 "**수동 버튼을 �
 | 1.5.1 | ⬜ 구매 후 설문 (제로파티) | 주문 완료 접점에 1문항 설문("어디서 보고 오셨어요?" + 선택 demographic). v1은 링크 설문으로 시작 가능. `connext_survey_responses_history` 적재 → 어트리뷰션 보정(3.5.2) + demographic **실측**(3.3.3에서 유추보다 우선 사용) | P1 | 2.3.3 |
 | 1.5.2 | ⬜ 경쟁 IG 벤치마크 | Python `pipeline/` 스크레이퍼로 경쟁 계정 공개 지표 트래킹 → 비교 뷰. **착수 전 ToS·법무 리스크 검토 게이트 필수** | P2 | 0.1.1 |
 
+#### E1.6 리뷰·댓글 수집 — 텍스트 마이닝 원천 — 규모 M · 2026-07-13 추가
+
+소셜 댓글·상품 리뷰를 모아 **3.6.5 리뷰·CS 텍스트 마이닝 → `derived_review_signals`** 의 원천으로 쓴다.
+난이도 순으로 착수(YouTube가 최단 — API 키·무심사). **TikTok 조직 댓글은 제외**: 공식 경로가 막혀 있고(Research API=연구자 전용, Business API=광고 모더레이션) 비공식(`davidteather/TikTok-Api` 등)은 ToS 위반 + 서명·안티봇으로 취약. 조사 근거: 루트 `comments-reviews.md` (2026-07-13).
+
+| ID | 태스크 | 내용 / 완료 기준 | 우선 | 의존 |
+|---|---|---|---|---|
+| 1.6.1 | ⬜ YouTube 댓글 | **최단 — 승인 불필요.** Data API v3 `commentThreads.list`(+replies), **API 키**로 공개 댓글 조회(무심사, 호출당 1~3 units / 공용 10k units·day). YouTube 커넥터(1.1.7)에 `comments` data_type 추가 → `youtube_comments_history` | P1 | 1.1.7 |
+| 1.6.2 | ⬜ Instagram 댓글 | IG Graph API `GET /{media}/comments` + `/{comment}/replies`, **`instagram_manage_comments` 스코프(Advanced Access 앱리뷰 선행)**. 기존 IG 커넥터 재사용, 웹훅 증분(1.2.8). `CLAUDE.md` 레이트리밋 수칙 준수(인사이트와 동일 `X-Business-Use-Case-Usage` 버킷, 버스트 금지) → `instagram_comments_history` | P1 | 1.1.3 |
+| 1.6.3 | ⬜ Shopify 리뷰 (Judge.me) | Shopify 네이티브 리뷰 폐지(2024) → 리뷰는 리뷰앱에 산다. **Judge.me API 커넥터**(무료·API 친화적) 우선, `shopify_products.product_id` 조인. 머천트가 Yotpo/Loox/Okendo면 어댑터로 확장 → `shopify_product_reviews_history`(source=judgeme) | P1 | 2.3.3 |
+| 1.6.4 | ⬜ 리뷰·댓글 DDL | E2.2 결정트리 통과: 전부 **이벤트 → `_history`**. 공통 컬럼 comment/review_id·parent_id·text·author·rating(리뷰)·like_count·timestamp·source. 2.3.3와 통합해 v2 SQL에 반영 | P1 | 2.2.1 |
+| 1.6.5 | ⬜ 텍스트 마이닝 파이프 연결 | 위 원천 → 3.6.5 LLM 토픽·감성 → `derived_review_signals` → 인사이트 카드. 다국어(한/영) 처리 | P1 | 3.6.5, (1.6.1~3 중 1+) |
+| — | 🚫 TikTok 조직 댓글 (제외) | 공식 경로 없음 + 비공식은 ToS·취약 → **보류**. 필요 시 일회성·리서치 한정으로만, §5 규칙 + 1.5.2 법무 게이트 통과 후. 광고/성과는 기존 1.1.8로 | 보류 | — |
+
+**완료 기준(에픽):** 최소 1개 원천(YouTube가 최단)에서 댓글이 들어와 3.6.5 파이프로 한국어 감성 카드가 자동 생성된다.
+> 참고: 1.1.13 채널톡(CS 문의)도 같은 텍스트 원천 → 3.6.5로 합류.
+
 ---
 
 ### 필러 2 — 플랫폼별 데이터 특성 기반 웨어하우스 모델링
@@ -172,7 +190,7 @@ Phase 1(기반 + Shopify/Meta)은 완료. 지금 제품은 "**수동 버튼을 �
 |---|---|---|---|---|
 | 2.3.1 | ⬜ TikTok·YouTube·Google Ads DDL | 결정 트리 적용해 v2에 추가 (대체로 config snapshot + `_stat`) | P2 | 2.2.1 |
 | 2.3.2 | ⬜ Naver·Coupang·NSA·Kakao DDL | 한국 채널 특수성 반영: KST→UTC, 마스킹된 PII(안심번호), 정산(settlement) 이벤트 | P2 | 2.2.1 |
-| 2.3.3 | ⬜ 리뷰·설문·외부변수 DDL | 상품 리뷰(`*_product_reviews_history`), 구매 후 설문(`connext_survey_responses_history`), 외부 참조(`ext_*`) — 2.2.2 규약 적용 | P1 | 2.2.2 |
+| 2.3.3 | ⬜ 리뷰·댓글·설문·외부변수 DDL | 상품 리뷰(`shopify_product_reviews_history` 등), **소셜 댓글(`youtube_comments_history`·`instagram_comments_history`)**, 구매 후 설문(`connext_survey_responses_history`), 외부 참조(`ext_*`) — 2.2.2 규약. 댓글/리뷰 스키마는 1.6.4와 통합 | P1 | 2.2.2 |
 
 **완료 기준(에픽):** 커넥터가 붙는 시점에 해당 플랫폼 DDL이 이미 v2에 존재 (커넥터 구현이 스키마를 기다리지 않게 함).
 
@@ -393,7 +411,7 @@ Phase 1(기반 + Shopify/Meta)은 완료. 지금 제품은 "**수동 버튼을 �
 | **M2.5 — 남는 돈이 보인다** (v1.1) | "오늘 장사, 실제로 얼마 남았는지 안다" | 3.7.1, 3.7.2, 3.7.3, 1.2.8, 4.2.3 | 일별 공헌이익 카드 + 실시간 오늘 위젯 라이브 |
 | **M3 — 채널 확장 1차** | "IG·GA4·Cafe24까지 한 화면" | 1.1.3, 1.1.4, 1.1.5(리뷰 1.1.14 포함), 1.2.6, 1.2.7, 1.3.1, 4.1.2, 4.1.3, 4.2.1, 4.2.2, 4.6.4(데모) | 5개 채널 데이터가 크로스채널 홈에 |
 | **M4 — 고객을 아는 대시보드** | "누가 사는지, 다시 사는지 안다" | 3.2.1, 3.2.2, 3.3.1, 3.3.3, 3.4.1, 3.4.2, 3.4.3, 1.2.4(백필), 1.5.1(설문) | demographic×구매 교차 뷰 라이브 |
-| **M5 — 인사이트 엔진 v1** | "대시보드가 다음 행동을 말해준다" | 3.5.2, 3.6.1, 3.6.2, 3.6.4, 3.6.5, 1.2.9, 4.6.1, 4.6.3 | 주 1개 이상 유의미한 한국어 인사이트 카드 자동 생성 |
+| **M5 — 인사이트 엔진 v1** | "대시보드가 다음 행동을 말해준다" | 3.5.2, 3.6.1, 3.6.2, 3.6.4, 3.6.5, 1.6.1(YT 댓글 최단 원천)→1.6.5, 1.2.9, 4.6.1, 4.6.3 | 주 1개 이상 유의미한 한국어 인사이트 카드 자동 생성 |
 | **M6+ — 확장** | 한국 채널 전면화·온톨로지·예측 | 1.1.6–1.1.13, 1.5.2, 2.3.x, 3.5.1, 3.6.3, 3.7.4, 4.5.x, 4.6.2 | 별도 재계획 |
 
 병행 규칙: M1(파이프라인)과 M2(분석 최단 경로)는 의존이 얕아 **동시 진행 가능**. M2.5는 M2 직후 최우선 — 재료가 이미 적재 대상이라 짧다. M4는 M3의 Cafe24/IG 데이터가 있을수록 정확해지지만 Shopify 단독으로도 시작 가능.
