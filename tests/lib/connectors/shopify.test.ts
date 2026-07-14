@@ -120,6 +120,58 @@ describe('shopifyConnector', () => {
     expect(result.nextCursor).toBeUndefined()
   })
 
+  it('extracts attribution / referral fields on orders (v2 columns)', async () => {
+    const apiOrder = {
+      id: 999,
+      admin_graphql_api_id: 'gid://shopify/Order/999',
+      name: '#1042',
+      created_at: '2024-06-01T10:00:00Z',
+      updated_at: '2024-06-02T10:00:00Z',
+      processed_at: '2024-06-01T10:05:00Z',
+      cancelled_at: null,
+      cancel_reason: null,
+      financial_status: 'paid',
+      currency: 'USD',
+      total_price: '120.00',
+      subtotal_price: '100.00',
+      total_tax: '10.00',
+      total_discounts: '15.00',
+      total_shipping_price_set: { shop_money: { amount: '10.00' } },
+      customer: { id: 7 },
+      email: 'b@x.com',
+      shipping_address: { country_code: 'KR' },
+      source_name: 'web',
+      landing_site: '/?utm_source=instagram&utm_campaign=summer',
+      referring_site: 'https://instagram.com/',
+      discount_codes: [{ code: 'SUMMER20', amount: '15.00', type: 'percentage' }],
+      tags: 'vip, wholesale',
+      line_items: [{ id: 1 }, { id: 2 }],
+      test: false,
+    }
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ orders: [apiOrder] }),
+      headers: { get: () => null, has: () => false },
+    })
+
+    const { rows } = await shopifyConnector.fetch(baseJob)
+    const row = rows[0]
+    expect(row.order_gid).toBe('gid://shopify/Order/999')
+    expect(row.name).toBe('#1042')
+    expect(row.source_name).toBe('web')
+    expect(row.landing_site).toBe('/?utm_source=instagram&utm_campaign=summer')
+    expect(row.referring_site).toBe('https://instagram.com/')
+    expect(row.discount_codes).toEqual(['SUMMER20'])
+    expect(row.tags).toEqual(['vip', 'wholesale'])
+    expect(row.country_code).toBe('KR')
+    expect(row.subtotal_price).toBe(100)
+    expect(row.total_tax).toBe(10)
+    expect(row.total_shipping_price).toBe(10)
+    expect(row.total_discounts).toBe(15)
+    expect(row.line_items_count).toBe(2)
+    expect(row.test).toBe(0)
+  })
+
   it('sends page_info cursor on paginated requests', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,

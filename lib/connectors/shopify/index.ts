@@ -72,20 +72,47 @@ export const shopifyConnector: Connector = {
       const { body, nextCursor } = await shopifyFetch(url, job.credentials.accessToken)
       const orders = (body.orders as Record<string, unknown>[]) ?? []
       return {
-        rows: orders.map((order) => ({
-          tenant_id: job.tenantId,
-          connection_id: job.connectionId,
-          raw: JSON.stringify(order),
-          order_id: String(order.id),
-          created_at: order.created_at,
-          updated_at: order.updated_at,
-          current_total_price: Number(order.total_price ?? 0),   // v2 column name
-          currency: order.currency ?? '',
-          financial_status: order.financial_status ?? '',
-          fulfillment_status: order.fulfillment_status ?? '',
-          customer_id: String((order.customer as Record<string, unknown> | null)?.id ?? ''),
-          email: order.email ?? '',
-        })),
+        rows: orders.map((order) => {
+          const shipAddr = (order.shipping_address as Record<string, unknown> | null) ?? {}
+          const shipSet = (order.total_shipping_price_set as Record<string, unknown> | null) ?? {}
+          const shipMoney = (shipSet.shop_money as Record<string, unknown> | null) ?? {}
+          const codes = (order.discount_codes as Record<string, unknown>[] | null) ?? []
+          const tags = typeof order.tags === 'string' && order.tags ? order.tags.split(', ') : []
+          const lineItems = (order.line_items as unknown[] | null) ?? []
+          return {
+            tenant_id: job.tenantId,
+            connection_id: job.connectionId,
+            raw: JSON.stringify(order),
+            order_id: String(order.id),
+            order_gid: order.admin_graphql_api_id ?? '',
+            name: order.name ?? '',
+            created_at: order.created_at,
+            updated_at: order.updated_at,
+            processed_at: order.processed_at ?? undefined,
+            cancelled_at: order.cancelled_at ?? undefined,
+            closed_at: order.closed_at ?? undefined,
+            cancel_reason: order.cancel_reason ?? '',
+            financial_status: order.financial_status ?? '',
+            fulfillment_status: order.fulfillment_status ?? '',
+            currency: order.currency ?? '',
+            current_total_price: Number(order.total_price ?? 0),   // v2 column name
+            subtotal_price: Number(order.subtotal_price ?? 0),
+            total_tax: Number(order.total_tax ?? 0),
+            total_shipping_price: Number(shipMoney.amount ?? 0),   // REST nests shipping in a money set
+            total_discounts: Number(order.total_discounts ?? 0),
+            customer_id: String((order.customer as Record<string, unknown> | null)?.id ?? ''),
+            email: order.email ?? '',
+            country_code: shipAddr.country_code ?? '',
+            // attribution / referral — UTM lives in landing_site; codes = coupon/referral codes used
+            source_name: order.source_name ?? '',
+            landing_site: order.landing_site ?? '',
+            referring_site: order.referring_site ?? '',
+            discount_codes: codes.map((c) => String((c as Record<string, unknown>).code ?? '')).filter(Boolean),
+            tags,
+            line_items_count: lineItems.length,
+            test: order.test ? 1 : 0,
+          }
+        }),
         nextCursor,
       }
     }
