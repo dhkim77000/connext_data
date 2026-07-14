@@ -44,7 +44,7 @@ Phase 1(기반 + Shopify/Meta)은 완료. 지금 제품은 "**수동 버튼을 �
 | 영역 | 상태 | 요약 |
 |---|---|---|
 | 기반 인프라 (auth·RLS·CH 클라이언트·커넥터 레지스트리·수동 싱크) | ✅ | Phase 1 완료, 라이브 배포 (`connext-snowy.vercel.app`) |
-| 커넥터 — Shopify | ✅ | OAuth + 만료형 토큰 로테이션 + fetch 6종, 실데이터 가동 |
+| 커넥터 — Shopify | 🔶 | OAuth + 만료형 토큰 로테이션 + fetch **5종**(orders/line_items/products/variants/customers). orders 어트리뷰션 필드(source_name·landing_site·referring_site·discount_codes·tags·금액분해) 추출 완료(2026-07-13). **미구현: 레퍼럴/마케팅·수익성 dataType 14종**(1.1.1a). ⚠️ 라이브 웨어하우스 데이터는 현재 **synthetic seed**(실 스토어 미연동) |
 | 커넥터 — Meta Ads | ✅ | OAuth(`ads_read`) + campaigns/insights_stat 가동. 토큰 자동 갱신은 없음 |
 | 커넥터 — Instagram | 🔶 | OAuth 완료, **TS fetch는 스텁**. Python `pipeline/`에 Graph 클라이언트·스크레이퍼 완성 |
 | 커넥터 — GA4·Google Ads·YouTube·TikTok·Cafe24 | 🔶 | OAuth 라우트만 스캐폴드, fetch 커넥터 없음 |
@@ -74,7 +74,8 @@ Phase 1(기반 + Shopify/Meta)은 완료. 지금 제품은 "**수동 버튼을 �
 
 | ID | 플랫폼 | 자격증명 | fetch 커넥터 | DDL(v2) | 상태 → 다음 액션 | 우선 |
 |---|---|---|---|---|---|---|
-| 1.1.1 | Shopify | ✅ | ✅ | ✅ | ✅ 완료 — 유지보수만 | — |
+| 1.1.1 | Shopify (핵심 5종) | ✅ | ✅ | ✅ | ✅ orders(어트리뷰션 필드 포함 2026-07-13)·line_items·products·variants·customers | — |
+| 1.1.1a | Shopify — 레퍼럴·마케팅·수익성 dataType | ✅ | ⬜ | ✅ | 스키마는 준비됐으나 fetch 미구현 **14종**. **레퍼럴/마케팅:** `discount_codes`·`price_rules`(쿠폰/레퍼럴 코드)·`marketing_events`(UTM 캠페인)·`abandoned_checkouts`. **수익성:** `transactions`·`refunds`·`payouts`·`disputes`·`returns`. **운영:** `fulfillments`·`inventory_levels`·`locations`·`collections`·`shop`. 각 fetch+매핑. GraphQL의 `Order.customerJourneySummary`(마케팅 어트리뷰션)도 검토 | P1 |
 | 1.1.2 | Meta Ads | ✅ | ✅ | ✅ | ✅ 완료 (토큰 갱신은 1.3.1) | — |
 | 1.1.3 | Instagram organic | ✅ | ⬜ 스텁 | ✅ | **TS fetch 구현** — Python `pipeline/connext_pipeline/`의 검증된 호출 패턴 포팅 (media, account insights). `CLAUDE.md` 레이트리밋 수칙 준수 | P0 |
 | 1.1.4 | GA4 | 🔶 OAuth만 | ⬜ | ✅ (`ga4_daily_stat`) | Data API `runReport` 커넥터 + 토큰버킷(200k/day) | P1 |
