@@ -24,12 +24,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap"
         />
       </head>
       <body>
         <Script id="theme-init" strategy="beforeInteractive">
-          {`try{var t=localStorage.getItem('theme')||'dark';if(t!=='light')document.documentElement.classList.add('dark')}catch(e){document.documentElement.classList.add('dark')}`}
+          {`try{var t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark')}catch(e){}`}
         </Script>
         {children}
       </body>

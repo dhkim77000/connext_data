@@ -13,8 +13,10 @@ export async function GET(request: Request) {
 
   const nonce = crypto.randomUUID()
   const redirectUri = `${getBaseUrl(request)}/api/oauth/instagram/callback`
+  // Falls back to the shared Meta app (META_APP_ID) when no dedicated Instagram app is set —
+  // one consolidated "connext" app (Facebook Login for Business) serves both ads + Instagram.
   const authUrl = 'https://www.facebook.com/v19.0/dialog/oauth?' + new URLSearchParams({
-    client_id: process.env.INSTAGRAM_APP_ID!,
+    client_id: (process.env.INSTAGRAM_APP_ID || process.env.META_APP_ID)!,
     redirect_uri: redirectUri,
     scope: SCOPES,
     state: nonce,

@@ -1,7 +1,7 @@
 // app/api/oauth/instagram/callback/route.ts
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { getBaseUrl } from '@/lib/base-url'
 
 export async function GET(request: Request) {
@@ -19,13 +19,16 @@ export async function GET(request: Request) {
   const tokenRes = await fetch(
     'https://graph.facebook.com/v19.0/oauth/access_token?' +
     new URLSearchParams({
-      client_id: process.env.INSTAGRAM_APP_ID!,
-      client_secret: process.env.INSTAGRAM_APP_SECRET!,
+      client_id: (process.env.INSTAGRAM_APP_ID || process.env.META_APP_ID)!,
+      client_secret: (process.env.INSTAGRAM_APP_SECRET || process.env.META_APP_SECRET)!,
       redirect_uri: redirectUri,
       code,
     })
   )
-  if (!tokenRes.ok) return NextResponse.json({ error: 'Token exchange failed' }, { status: 500 })
+  if (!tokenRes.ok) {
+    const detail = await tokenRes.text()
+    return NextResponse.json({ error: 'Token exchange failed', detail }, { status: 500 })
+  }
   const { access_token } = (await tokenRes.json()) as { access_token: string }
 
   // The IG business account lives on one of the user's Facebook Pages.
@@ -45,8 +48,7 @@ export async function GET(request: Request) {
     .from('tenants').select('id').eq('owner_auth_id', user.id).single()
   if (!tenant) return NextResponse.redirect(new URL('/dashboard', request.url))
 
-  const service = await createServiceClient()
-  const { data: connection, error } = await service
+  const { data: connection, error } = await supabase
     .from('channel_connections')
     .insert({
       tenant_id: tenant.id,
@@ -60,7 +62,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Failed to create connection' }, { status: 500 })
   }
 
-  await service.from('channel_credentials').insert({ connection_id: connection.id, access_token })
+  await supabase.from('channel_credentials').insert({ connection_id: connection.id, access_token })
 
   const redirect = NextResponse.redirect(new URL('/channels', request.url))
   redirect.cookies.delete('instagram_oauth_nonce')

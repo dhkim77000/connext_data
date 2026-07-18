@@ -3,9 +3,11 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getBaseUrl } from '@/lib/base-url'
 
-// Read-only scopes — connext only ingests/analyzes ad data, never writes.
+// Read-only scope — connext only ingests/analyzes ad data, never writes.
 // Avoiding ads_management / business_management eases Meta App Review + Tech Provider verification.
-const SCOPES = 'ads_read,read_insights'
+// (read_insights removed — it's a Page-insights scope connext doesn't use, and Facebook
+//  rejects it as "Invalid Scopes" on this app, blocking the whole OAuth.)
+const SCOPES = 'ads_read'
 
 export async function GET(request: Request) {
   const supabase = await createClient()

@@ -3,7 +3,10 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getBaseUrl } from '@/lib/base-url'
 
-const SCOPES = 'read_orders,read_products,read_customers'
+// write_orders added to generate test orders via the Admin API. NOTE: this is a Dev
+// Dashboard (managed-install) app — granted scopes come from the app config, not this
+// param — so write_orders must ALSO be enabled in the Dashboard's scope list.
+const SCOPES = 'read_orders,write_orders,read_products,read_customers'
 
 export async function GET(request: Request) {
   const supabase = await createClient()

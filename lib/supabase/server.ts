@@ -27,9 +27,12 @@ export async function createClient() {
 }
 
 export async function createServiceClient() {
+  // Supabase's new key naming = SUPABASE_SECRET_KEY (sb_secret_…); fall back to the
+  // legacy SUPABASE_SERVICE_ROLE_KEY. Either is the secret key that bypasses RLS.
+  const secretKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    secretKey!,
     { cookies: { getAll: () => [], setAll: () => {} } }
   )
 }
