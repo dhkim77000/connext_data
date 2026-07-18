@@ -1,0 +1,26 @@
+[project]
+name = "connext-pipeline"
+version = "0.1.0"
+description = "connext data pipeline — scrapers, cleaning, analysis (Instagram first)."
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.27",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+connext-pipeline = "connext_pipeline.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["connext_pipeline*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
